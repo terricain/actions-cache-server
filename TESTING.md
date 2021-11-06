@@ -1,6 +1,8 @@
 # Local testing snippets
 
-Below is a list of curl commands to test the sever
+Below is a list of curl commands to test the sever.
+
+The `--debug` flag disables claims validation on the JWTs, so you can just reuse these
 
 ```shell
 # Search Cache

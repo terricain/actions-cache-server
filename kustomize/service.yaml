@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    helm.sh/chart: actions-cache-server-0.0.0
+    app.kubernetes.io/name: actions-cache-server
+    app.kubernetes.io/version: 0.0.0
+    app.kubernetes.io/managed-by: Helm
+  name: actions-cache-server
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+      appProtocol: http
+  selector:
+    app.kubernetes.io/name: actions-cache-server

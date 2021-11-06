@@ -66,6 +66,8 @@ func main() {
 	router := gin.Default()
 	router.Use(web.XForwardedProto("http"))
 
+	router.GET("/healthz", web.HealthCheckEndpoint)
+
 	authedGroup := router.Group("/:repo")
 	authedGroup.Use(handlers.AuthRequired())
 	authedGroup.GET("/_apis/artifactcache/cache", handlers.SearchCache)
