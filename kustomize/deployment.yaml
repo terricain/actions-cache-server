@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: TODO
+          image: ghcr.io/terrycain/actions-cache-server:0.1.3
           imagePullPolicy: IfNotPresent
           env:
             - name: LISTEN_ADDR

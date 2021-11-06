@@ -9,10 +9,12 @@ Once you have the server running, you'll need to setup the cache action to use t
 plugin needs to be modified to use an external server, I have said modified cache action [here](https://github.com/terrycain/cache). I intend to upstream
 these changes at some point, for those that are interested the changes are on the `custom-url` branch.
 
+Check the releases page for the latest links to helm charts, docker images and Kustomization manifests.
+
 ```shell
 mkdir db cache
 
-docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache INSERT_GHCR_IMAGE_HERE \
+docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache docker pull ghcr.io/terrycain/actions-cache-server:0.1.3 \
   --db-sqlite /tmp/db/db.sqlite \
   --storage-disk /tmp/cache \
   --listen-address 0.0.0.0:8080
