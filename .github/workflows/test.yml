@@ -43,6 +43,7 @@ jobs:
     name: helm-validation
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Validate Helm chart
         uses: stefanprodan/kube-tools@v1
         with:
