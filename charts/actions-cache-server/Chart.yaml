@@ -1,0 +1,15 @@
+apiVersion: v2
+name: actions-cache-server
+appVersion: 0.1.3
+version: 0.1.3
+kubeVersion: ">= 1.19.0"
+description: GitHub Actions cache server.
+home: https://github.com/terrycain/actions-cache-server
+sources:
+  - https://github.com/terrycain/actions-cache-server
+maintainers:
+  - name: terrycain
+    email: terry@terrys-home.co.uk
+
+type: application
+engine: gotpl

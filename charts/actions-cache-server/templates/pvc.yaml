@@ -1,0 +1,35 @@
+{{- if .Values.pvc.enabled -}}
+{{- if not .Values.pvc.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+{{- if .Values.pvc.annotations }}
+  annotations:
+{{ toYaml .Values.pvc.annotations | indent 4 }}
+{{- end }}
+  labels:
+{{ include "acs.labels" . | indent 4 }}
+{{- if .Values.pvc.labels }}
+{{ toYaml .Values.pvc.labels | indent 4 }}
+{{- end }}
+  name: {{ template "acs.fullname" . }}
+{{ include "acs.namespace" . | indent 2 }}
+spec:
+  accessModes:
+{{ toYaml .Values.pvc.accessModes | indent 4 }}
+{{- if .Values.pvc.storageClass }}
+{{- if (eq "-" .Values.pvc.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.pvc.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.pvc.size }}"
+{{- if .Values.pvc.selector }}
+  selector:
+  {{- toYaml .Values.pvc.selector | nindent 4 }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

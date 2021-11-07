@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+{{- if .Values.deployment.annotations }}
+  annotations:
+{{ toYaml .Values.deployment.annotations | nindent 4 }}
+{{- end }}
+  labels:
+{{- if .Values.deployment.labels }}
+{{ toYaml .Values.deployment.labels | nindent 4 }}
+{{- end }}
+{{- include "acs.labels" . | nindent 4 }}
+  name: {{ template "acs.fullname" . }}
+{{ include "acs.namespace" . | indent 2 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "acs.matchLabels" . | nindent 6 }}
+  replicas: {{ .Values.deployment.replicaCount }}
+  {{- if .Values.deployment.strategy }}
+  strategy:
+{{ toYaml .Values.deployment.strategy | trim | indent 4 }}
+    {{ if eq .Values.deployment.strategy.type "Recreate" }}rollingUpdate: null{{ end }}
+{{- end }}
+  template:
+    metadata:
+      {{- if .Values.deployment.podAnnotations }}
+      annotations:
+        {{ toYaml .Values.deployment.podAnnotations | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "acs.labels" . | nindent 8 }}
+        {{- if .Values.deployment.podLabels}}
+        {{ toYaml .Values.deployment.podLabels | nindent 8 }}
+        {{- end}}
+    spec:
+      {{- if .Values.deployment.priorityClassName }}
+      priorityClassName: "{{ .Values.deployment.priorityClassName }}"
+      {{- end }}
+      {{- if .Values.deployment.schedulerName }}
+      schedulerName: "{{ .Values.deployment.schedulerName }}"
+      {{- end }}
+      enableServiceLinks: false
+      {{- if .Values.deployment.serviceAccountName }}
+      serviceAccountName: "{{ .Values.deployment.serviceAccountName }}"
+      {{- end }}
+      containers:
+        - name: {{ .Values.deployment.podName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          env:
+            - name: LISTEN_ADDRESS
+              value: "0.0.0.0:8080"
+          {{- if .Values.deployment.env }}
+{{ toYaml .Values.deployment.env | indent 12}}
+          {{- end }}
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: http
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            timeoutSeconds: 3
+            failureThreshold: 1
+            successThreshold: 1
+          {{- if .Values.deployment.resources -}}
+          resources:
+{{ toYaml .Values.deployment.resources | indent 12 }}
+          {{- end -}}
+          {{- if .Values.pvc.enabled }}
+          volumeMounts:
+            - name: volume
+              mountPath: {{ .Values.pvc.mountPath }}
+          {{- end -}}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+    {{- end }}
+      terminationGracePeriodSeconds: 2
+{{- if .Values.pvc.enabled }}
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: {{ if .Values.pvc.existingClaim }}{{ .Values.pvc.existingClaim }}{{- else }}{{ template "acs.fullname" . }}{{- end }}
+{{- end -}}

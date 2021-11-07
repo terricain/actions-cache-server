@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.service.annotations }}
+annotations:
+{{ toYaml .Values.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+{{ include "acs.labels" . | indent 4 }}
+{{- if .Values.service.labels }}
+{{ toYaml .Values.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "acs.fullname" . }}
+{{ include "acs.namespace" . | indent 2 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.service.servicePort }}
+      protocol: TCP
+      targetPort: 8080
+  selector:
+{{- include "acs.matchLabels" . | nindent 4 }}
+  type: ClusterIP

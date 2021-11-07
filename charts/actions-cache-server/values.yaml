@@ -1,0 +1,74 @@
+
+name: actions-cache-server
+image:
+  repository: ghcr.io/terrycain/actions-cache-server
+  tag: 0.1.3
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+# - name: "image-pull-secret"
+
+deployment:
+  # strategy: <- specify this to control the rollout strategy as you would in a normal manifest
+  # serviceAccountName: <- sa name
+
+  ## Additional server container environment variables
+  ##
+  ## You specify this manually like you would a raw deployment manifest.
+  ## This means you can bind in environment variables from secrets.
+  ##
+  ## e.g. static environment variable:
+  ##  - name: DEMO_GREETING
+  ##    value: "Hello from the environment"
+  ##
+  ## e.g. secret environment variable:
+  ## - name: USERNAME
+  ##   valueFrom:
+  ##     secretKeyRef:
+  ##       name: mysecret
+  ##       key: username
+  env: []
+
+  podName: "app"
+  podAnnotations: {}
+    # iam.amazonaws.com/role: actions-cache-server
+  podLabels: {}
+  annotations: {}
+  labels: {}
+  replicaCount: 1
+
+  # TODO
+  # resources:
+
+service:
+  annotations: {}
+  labels: {}
+  servicePort: 80
+
+pvc:
+  enabled: false
+  annotations: {}
+  labels: {}
+  accessModes:
+    - ReadWriteOnce
+  # storageClass: "-"
+
+  ## Requires persistentVolume.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  existingClaim: ""
+
+  ## Persistent Volume Claim Selector
+  ## Useful if Persistent Volumes have been provisioned in advance
+  ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+  ##
+  # selector:
+  #  matchLabels:
+  #    release: "stable"
+  #  matchExpressions:
+  #    - { key: environment, operator: In, values: [ dev ] }
+
+  mountPath: /data
+  size: 10Gi
+
+# Force namespace of namespaced resources
+forceNamespace: null
