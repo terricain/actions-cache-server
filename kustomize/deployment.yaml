@@ -2,21 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    helm.sh/chart: actions-cache-server-0.0.0
-    app.kubernetes.io/name: actions-cache-server
-    app.kubernetes.io/version: 0.0.0
-    app.kubernetes.io/managed-by: Helm
+    app: actions-cache-server
   name: actions-cache-server
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: actions-cache-server
+      app: actions-cache-server
   revisionHistoryLimit: 10
   minReadySeconds: 0
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: actions-cache-server
+        app: actions-cache-server
     spec:
       containers:
         - name: server

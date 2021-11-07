@@ -17,4 +17,4 @@ spec:
       targetPort: http
       appProtocol: http
   selector:
-    app.kubernetes.io/name: actions-cache-server
+    app: actions-cache-server
