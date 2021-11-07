@@ -50,7 +50,7 @@ jobs:
           helm: 2.17.0
           helmv3: 3.6.0
           command: |
-            helmv3 template ./charts/actions-cache-sever | kubeval --strict --kubernetes-version 1.19.11 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
+            helmv3 template ./charts/actions-cache-server | kubeval --strict --kubernetes-version 1.19.11 --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master
       - name: Validate kustomization
         uses: stefanprodan/kube-tools@v1
         with:
