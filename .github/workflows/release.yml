@@ -1,26 +1,13 @@
 ---
-name: 'CI'
+name: 'Release'
 
 on:
   push:
-    branches:
-      - master
     tags:
       - '*'
 
 jobs:
-  golangci:
-    name: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: latest
-
   # TODO tests
-
   release:
     name: Release
     runs-on: ubuntu-latest
