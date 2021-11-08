@@ -188,6 +188,9 @@ func (b *Backend) FinishCache(repoKey string, cacheID int, size int64) error {
 
 func (b *Backend) FinishCacheUpload(repoKey string, cacheID int, size int64, backend, path string) error {
 	result, err := b.db.Exec(SetCacheSizeBackend, size, backend, path, repoKey, cacheID)
+	if err != nil {
+		return err
+	}
 	rowsAffected, _ := result.RowsAffected()
 	log.Debug().Int64("rows", rowsAffected).Msg("Rows affected")
 	return err

@@ -63,10 +63,12 @@ func main() {
 	}
 
 	gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery(), web.GinLogger())
 	router.Use(web.XForwardedProto("http"))
 
 	router.GET("/healthz", web.HealthCheckEndpoint)
+	router.GET("/ping", web.PingEndpoint)
 
 	authedGroup := router.Group("/:repo")
 	authedGroup.Use(handlers.AuthRequired())
