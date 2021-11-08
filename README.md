@@ -8,7 +8,7 @@ upload job caches to a local server.
 
 This repo is still in an alpha like state, thing will most likely change, especially the Helm charts and Kustomize manifests.
 
-Main issue currently is that multiple PATCH requests are made to upload chunks and they need to be accounted for and combined
+**Main issue currently is that multiple PATCH requests are made to upload chunks and they need to be accounted for and combined**
 
 - [Why does this exist](#why-does-this-exist)
 - [How to run](#how-to-run)
