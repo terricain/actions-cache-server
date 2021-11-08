@@ -1,9 +1,10 @@
 package web
 
 import (
-"github.com/gin-gonic/gin"
-"github.com/rs/zerolog/log"
-"time"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 func GinLogger() gin.HandlerFunc {
@@ -50,4 +51,3 @@ func GinLogger() gin.HandlerFunc {
 		}
 	}
 }
-
