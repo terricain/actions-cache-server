@@ -1,1 +1,1 @@
-DROP TABLE cache
+DROP TABLE cache;

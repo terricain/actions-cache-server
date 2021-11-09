@@ -100,6 +100,9 @@ Response 201:
 Params:
 * idint - The cache id returned from the POST to _apis/artifactcache/cache
 
+Headers:
+Content-Range: bytes 0-283/*
+
 Chunked upload of binary data. The data seems to be zstandard compressed directories
 
 Response 204
