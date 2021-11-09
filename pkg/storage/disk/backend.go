@@ -85,7 +85,7 @@ func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) 
 	}
 	defer fp.Close()
 
-	var loopErr error = nil
+	var loopErr error
 
 	for _, part := range parts {
 		partPath := p.Join(b.BaseDir, part.Data)

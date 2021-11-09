@@ -19,7 +19,7 @@ type ContentRange struct {
 
 var (
 	contentRangeRegex = regexp.MustCompile(`(?m)(\w+) ((\d+)-(\d+)|\*)/(\d+|\*)`)
-	ContentRangeError = errors.New("invalid content-range header")
+	ErrContentRange   = errors.New("invalid content-range header")
 )
 
 func ParseContentRange(value string) (ContentRange, error) {
@@ -27,11 +27,11 @@ func ParseContentRange(value string) (ContentRange, error) {
 
 	parts := contentRangeRegex.FindStringSubmatch(value)
 	if parts == nil {
-		return ContentRange{}, ContentRangeError
+		return ContentRange{}, ErrContentRange
 	}
 	if len(parts) != 6 { // Should never satisfy this but I'm paranoid
 		log.Error().Msg("Failed to parse Content-Range header, parts regexed is not 6")
-		return ContentRange{}, ContentRangeError
+		return ContentRange{}, ErrContentRange
 	}
 
 	result.Unit = parts[1]
@@ -55,7 +55,7 @@ func ParseContentRange(value string) (ContentRange, error) {
 	}
 
 	if result.Size == -1 && result.Start == -1 && result.End == -1 {
-		return ContentRange{}, ContentRangeError
+		return ContentRange{}, ErrContentRange
 	}
 
 	return result, nil

@@ -184,6 +184,9 @@ func (b *Backend) ValidateUpload(repoKey string, id int, size int64) ([]s.CacheP
 		totalSize += newPart.Size
 		result = append(result, newPart)
 	}
+	if err = rows.Err(); err != nil {
+		return []s.CachePart{}, err
+	}
 
 	if totalSize != size {
 		return []s.CachePart{}, e.ErrCacheSizeMismatch
