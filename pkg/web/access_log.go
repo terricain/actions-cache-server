@@ -15,7 +15,7 @@ func GinLogger() gin.HandlerFunc {
 
 		c.Next()
 
-		if path == "healthz" || path == "metrics" {
+		if path == "/healthz" || path == "/metrics" {
 			return
 		}
 

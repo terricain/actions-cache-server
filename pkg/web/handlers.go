@@ -116,18 +116,18 @@ func (h *Handlers) UploadCache(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing or invalid content-range header"})
 		return
 	}
+	calculatedSize := int64(parsedContentRange.End - (parsedContentRange.Start - 1)) // Seems to be inclusive of the range 0-10/* == 11 bytes
 
-	partData, bytesWritten, err := h.Storage.Write(repo, c.Request.Body)
+	partData, bytesWritten, err := h.Storage.Write(repo, c.Request.Body, parsedContentRange.Start, parsedContentRange.End, calculatedSize)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to store file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store file"})
 		return
 	}
 
-	calculatedSize := parsedContentRange.End - (parsedContentRange.Start - 1) // Seems to be inclusive of the range 0-10/* == 11 bytes
-	if bytesWritten != int64(calculatedSize) {
+	if bytesWritten != calculatedSize {
 		_ = h.Storage.Delete(repo, partData)
-		log.Error().Int("calculated_size", calculatedSize).Int64("bytes_written", bytesWritten).Msg("Calculated size vs bytes written mismatch")
+		log.Error().Int64("calculated_size", calculatedSize).Int64("bytes_written", bytesWritten).Msg("Calculated size vs bytes written mismatch")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "calculated size vs bytes written mismatch"})
 		return
 	}

@@ -5,8 +5,11 @@ import (
 	"io"
 	"net/url"
 	p "path"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/terrycain/actions-cache-server/pkg/s"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -77,7 +80,16 @@ func (b *Backend) Type() string {
 	return "s3"
 }
 
-func (b *Backend) Write(repoKey string, r io.Reader) (string, int64, error) {
+// S3 has UploadPartCopy to create multipart uploads from other objects. So we can upload chunks as uuid named
+// files and store the filename in a db with start and end therefore when finalising we know the order in which
+// to concatenate files.
+//
+// The reason we don't just use a regular multipart upload is chunks can be uploaded in parallel, and you could
+// receive a later chunk before an earlier one, multipart upload parts need an int 1-10000 and will be assembled
+// in sorted order, as we don't have data uploaded in order, we can't reliably do this.
+//
+// Write Uploads a part of a file to S3.
+func (b *Backend) Write(repoKey string, r io.Reader, start, end int, size int64) (string, int64, error) {
 	cacheFile := uuid.New().String()
 	filePath := p.Join(b.prefix, repoKey, cacheFile)
 
@@ -86,11 +98,18 @@ func (b *Backend) Write(repoKey string, r io.Reader) (string, int64, error) {
 		Bucket: aws.String(b.bucket),
 		Body:   r,
 		Key:    aws.String(filePath),
+		Metadata: map[string]*string{
+			"chunk_start": aws.String(strconv.Itoa(start)),
+			"chunk_end":   aws.String(strconv.Itoa(end)),
+			"chunk_size":  aws.String(strconv.FormatInt(size, 10)),
+			"ownedBy":     aws.String("actions-cache-server"),
+		},
 	})
 	if err != nil {
 		return "", 0, err
 	}
 
+	// Think I did this because we don't get returned the actual bytes uploaded count
 	headResponse, err := b.Client.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(b.bucket),
 		Key:    aws.String(filePath),
@@ -111,6 +130,78 @@ func (b *Backend) Delete(repoKey, path string) error {
 	})
 
 	return err
+}
+
+func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) {
+	// If we've only got 1 part, then use that as the cache file to save more work
+	if len(parts) == 1 {
+		filePath := p.Join(b.prefix, repoKey, parts[0].Data) // CachePart.Data would be a UUID without the repo key
+		return filePath, nil
+	}
+
+	cacheFile := uuid.New().String()
+	filePath := p.Join(b.prefix, repoKey, cacheFile)
+
+	multiPartUpload, err := b.Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: aws.String(b.bucket),
+		Key:    aws.String(filePath),
+		Metadata: map[string]*string{
+			"ownedBy": aws.String("actions-cache-server"),
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	uploadParts := make([]*s3.CompletedPart, 0)
+	for index, part := range parts {
+		// UploadPartCopy
+		partNumber := aws.Int64(int64(index + 1))
+		src := aws.String(b.bucket + "/" + p.Join(b.prefix, repoKey, part.Data))
+		resp, err2 := b.Client.UploadPartCopy(&s3.UploadPartCopyInput{
+			Bucket:     aws.String(b.bucket),
+			Key:        aws.String(filePath),
+			UploadId:   multiPartUpload.UploadId,
+			CopySource: src,
+			PartNumber: partNumber, // Part number 1->10000
+		})
+		if err2 != nil {
+			// Try and abort the multipart upload
+			_, _ = b.Client.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
+				Bucket:   aws.String(b.bucket),
+				Key:      aws.String(filePath),
+				UploadId: multiPartUpload.UploadId,
+			})
+			return "", err2
+		}
+
+		uploadPart := s3.CompletedPart{
+			ETag:       aws.String(strings.Trim(*resp.CopyPartResult.ETag, "\"")),
+			PartNumber: partNumber,
+		}
+		uploadParts = append(uploadParts, &uploadPart)
+	}
+
+	// By here, we've specified all the upload parts
+	_, err = b.Client.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
+		Bucket:   aws.String(b.bucket),
+		Key:      aws.String(filePath),
+		UploadId: multiPartUpload.UploadId,
+		MultipartUpload: &s3.CompletedMultipartUpload{
+			Parts: uploadParts,
+		},
+	})
+	if err != nil {
+		// Try and abort the multipart upload
+		_, _ = b.Client.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
+			Bucket:   aws.String(b.bucket),
+			Key:      aws.String(filePath),
+			UploadId: multiPartUpload.UploadId,
+		})
+		return "", err
+	}
+
+	return cacheFile, nil
 }
 
 func (b *Backend) GenerateArchiveURL(c *gin.Context, repoKey, path string) (string, error) {

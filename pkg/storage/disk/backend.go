@@ -39,7 +39,7 @@ func (b *Backend) Type() string {
 	return "disk"
 }
 
-func (b *Backend) Write(repoKey string, r io.Reader) (string, int64, error) {
+func (b *Backend) Write(repoKey string, r io.Reader, start, end int, size int64) (string, int64, error) {
 	cacheFile := uuid.New().String()
 	filePath := p.Join(b.BaseDir, cacheFile)
 

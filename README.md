@@ -8,8 +8,6 @@ upload job caches to a local server.
 
 This repo is still in an alpha like state, thing will most likely change, especially the Helm charts and Kustomize manifests.
 
-**Main issue currently is that multiple PATCH requests are made to upload chunks and they need to be accounted for and combined**
-
 - [Why does this exist](#why-does-this-exist)
 - [How to run](#how-to-run)
   - [Cache action setup](#cache-action-setup)
@@ -79,7 +77,7 @@ docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache 
 | Database | MongoDB              | :x: Will do if there is demand                        |
 | Database | CosmosDB             | :x: Will do if there is demand                        |
 | Storage  | Disk                 | :heavy_check_mark:                                    |
-| Storage  | AWS S3               | :x: Temporarily broken (Fixing multipart upload asap) |
+| Storage  | AWS S3               | :heavy_check_mark:                                    |
 | Storage  | Azure Blob Storage   | :x: Planned                                           |
 | Storage  | Google Cloud Storage | :x: Will do if there is demand                        |
 
