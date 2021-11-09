@@ -134,9 +134,9 @@ func (b *Backend) lookupCacheForScope(repoKey, scope string, restoreKeys []strin
 	return s.Cache{}, false, nil
 }
 
-func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope) (int, error) {
+func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope, backend string) (int, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
-	result, err := b.db.Exec(InsertNewCache, repoKey, scopes[0].Scope, key, version, now)
+	result, err := b.db.Exec(InsertNewCache, repoKey, scopes[0].Scope, key, version, now, backend)
 	if err != nil {
 		var sqliteErr sqlite.Error
 		if errors.As(err, &sqliteErr) {
@@ -157,41 +157,56 @@ func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope) (i
 	return int(cacheID), nil
 }
 
-func (b *Backend) FinishCache(repoKey string, cacheID int, size int64) error {
-	tx, err := b.db.Begin()
+func (b *Backend)  ValidateUpload(repoKey string, id int, size int64) ([]s.CachePart, error) {
+	rows, err := b.db.Query(GetAllParts, repoKey, id)
 	if err != nil {
-		return err
+		return []s.CachePart{}, err
+	}
+	defer rows.Close()
+
+	result := make([]s.CachePart, 0)
+	totalSize := int64(0)
+	nextStartByte := 0
+
+	for rows.Next() {
+		newPart := s.CachePart{}
+		if err2 := rows.Scan(&newPart.Start, &newPart.End, &newPart.Size, &newPart.Data); err2 != nil {
+			return []s.CachePart{}, err
+		}
+
+		// Check the parts are sequential, as they've been ordered by start
+		if newPart.Start != nextStartByte {
+			log.Warn().Str("repo", repoKey).Int("cache_id", id).Msg("Invalid upload ")
+			return []s.CachePart{}, e.ErrCacheInvalidParts
+		}
+		nextStartByte = newPart.End + 1
+
+		totalSize += newPart.Size
+		result = append(result, newPart)
 	}
 
-	row := tx.QueryRow(GetCacheSize, repoKey, cacheID)
-	var rowSize int64
-	if err = row.Scan(&rowSize); err != nil {
-		return err
+	if totalSize != size {
+		return []s.CachePart{}, e.ErrCacheSizeMismatch
 	}
 
-	if size != rowSize {
-		return e.ErrCacheSizeMismatch
-	}
+	return result, nil
+}
 
-	result, err := tx.Exec(SetCacheFinished, repoKey, cacheID)
+func (b *Backend) FinishCache(repoKey string, id int, path string) error {
+	result, err := b.db.Exec(SetCacheFinished, path, repoKey, id)
 	if err != nil {
 		return err
 	}
 	rowsAffected, _ := result.RowsAffected()
 	log.Debug().Int64("rows", rowsAffected).Msg("Rows affected")
 
-	if err = tx.Commit(); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (b *Backend) FinishCacheUpload(repoKey string, cacheID int, size int64, backend, path string) error {
-	result, err := b.db.Exec(SetCacheSizeBackend, size, backend, path, repoKey, cacheID)
-	if err != nil {
+func (b *Backend) AddUploadPart(repoKey string, id int, part s.CachePart) error {
+	if _, err := b.db.Exec(InsertPart, repoKey, id, part.Start, part.End, part.Size, part.Data); err != nil {
 		return err
 	}
-	rowsAffected, _ := result.RowsAffected()
-	log.Debug().Int64("rows", rowsAffected).Msg("Rows affected")
-	return err
+
+	return nil
 }

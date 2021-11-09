@@ -16,3 +16,11 @@ type Scope struct {
 	Scope      string `json:"Scope"`
 	Permission int    `json:"Permission"`
 }
+
+
+type CachePart struct {
+	Start int
+	End int
+	Size int64
+	Data string
+}

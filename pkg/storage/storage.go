@@ -2,10 +2,10 @@ package storage
 
 import (
 	"errors"
+	"github.com/terrycain/actions-cache-server/pkg/s"
 	"io"
 
 	"github.com/gin-gonic/gin"
-	s3 "github.com/terrycain/actions-cache-server/pkg/storage/aws-s3"
 	"github.com/terrycain/actions-cache-server/pkg/storage/disk"
 )
 
@@ -13,7 +13,10 @@ type Backend interface {
 	Setup() error
 	Type() string
 	Write(repoKey string, r io.Reader) (string, int64, error)
-	Delete(repoKey string, path string) error
+	Delete(repoKey string, partData string) error
+
+	// Finalise Takes a list of upload parts, and somehow concatenates them and returns a path which can be passed to GenerateArchiveURL
+	Finalise(repoKey string, parts []s.CachePart) (string, error)
 	GenerateArchiveURL(c *gin.Context, repoKey, path string) (string, error)
 	GetFilePath(key string) (string, error)
 }
@@ -26,7 +29,8 @@ func GetStorageBackend(backend, connectionString string) (Backend, error) {
 	case "disk":
 		b, err = disk.New(connectionString)
 	case "s3":
-		b, err = s3.New(connectionString)
+		// b, err = s3.New(connectionString)
+		fallthrough
 	default:
 		return nil, errors.New("invalid storage backend")
 	}

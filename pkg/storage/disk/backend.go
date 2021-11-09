@@ -2,6 +2,7 @@ package disk
 
 import (
 	"errors"
+	"github.com/terrycain/actions-cache-server/pkg/s"
 	"io"
 	"net/url"
 	"os"
@@ -57,8 +58,8 @@ func (b *Backend) Write(repoKey string, r io.Reader) (string, int64, error) {
 	return cacheFile, writtenBytes, nil
 }
 
-func (b *Backend) Delete(repoKey, path string) error {
-	filePath := p.Join(b.BaseDir, path)
+func (b *Backend) Delete(repoKey, partData string) error {
+	filePath := p.Join(b.BaseDir, partData)
 	return os.Remove(filePath)
 }
 
@@ -71,6 +72,49 @@ func (b *Backend) GenerateArchiveURL(c *gin.Context, repoKey, path string) (stri
 		Path:   urlPath,
 	}
 	return archiveURL.String(), nil
+}
+
+func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) {
+	cacheFile := uuid.New().String()
+	filePath := p.Join(b.BaseDir, cacheFile)
+
+	fp, err := os.OpenFile(filePath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	if err != nil {
+		return "", err
+	}
+	defer fp.Close()
+
+	var loopErr error = nil
+
+	for _, part := range parts {
+		partPath := p.Join(b.BaseDir, part.Data)
+		partFp, err2 := os.OpenFile(partPath, os.O_RDONLY, 0o644)
+		if err2 != nil {
+			loopErr = err2
+			break
+		}
+
+		_, err2 = io.Copy(fp, partFp)
+		_ = partFp.Close()
+		if err2 != nil {
+			loopErr = err2
+			break
+		}
+
+		// We've written part of the file, delete current part now as best cast we'll never need it again
+		_ = os.Remove(partPath)
+	}
+
+	if loopErr != nil { // Got an error, try and clean up FS
+		_ = fp.Close()
+		_ = os.Remove(filePath)
+		for _, part := range parts {
+			_ = b.Delete(repoKey, part.Data)
+		}
+		return "", loopErr
+	}
+
+	return cacheFile, nil
 }
 
 func (b *Backend) GetFilePath(key string) (string, error) {

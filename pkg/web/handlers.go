@@ -89,7 +89,7 @@ func (h *Handlers) StartCache(c *gin.Context) {
 	}
 	repo := c.Param("repo")
 
-	id, err := h.Database.CreateCache(repo, json.Key, json.Version, scopes)
+	id, err := h.Database.CreateCache(repo, json.Key, json.Version, scopes, h.Storage.Type())
 	if err != nil {
 		if errors.Is(err, e.ErrCacheAlreadyExists) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -111,15 +111,35 @@ func (h *Handlers) UploadCache(c *gin.Context) {
 		return
 	}
 
-	path, bytesWritten, err := h.Storage.Write(repo, c.Request.Body)
+	parsedContentRange, err := ParseContentRange(c.GetHeader("Content-Range"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing or invalid content-range header"})
+		return
+	}
+
+	partData, bytesWritten, err := h.Storage.Write(repo, c.Request.Body)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to store file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store file"})
 		return
 	}
 
-	if err = h.Database.FinishCacheUpload(repo, cacheID, bytesWritten, h.Storage.Type(), path); err != nil {
-		_ = h.Storage.Delete(repo, path) // Attempt to clean up file as we've failed to save it to db
+	calculatedSize := parsedContentRange.End - (parsedContentRange.Start - 1)  // Seems to be inclusive of the range 0-10/* == 11 bytes
+	if bytesWritten != int64(calculatedSize) {
+		_ = h.Storage.Delete(repo, partData)
+		log.Error().Int("calculated_size", calculatedSize).Int64("bytes_written", bytesWritten).Msg("Calculated size vs bytes written mismatch")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "calculated size vs bytes written mismatch"})
+		return
+	}
+
+	part := s.CachePart{
+		Start: parsedContentRange.Start,
+		End: parsedContentRange.End,
+		Size: bytesWritten,
+		Data: partData,
+	}
+	if err = h.Database.AddUploadPart(repo, cacheID, part); err != nil {
+		_ = h.Storage.Delete(repo, partData) // Attempt to clean up file as we've failed to save it to db
 		log.Error().Err(err).Msg("Failed to store file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store file"})
 		return
@@ -146,14 +166,29 @@ func (h *Handlers) FinishCache(c *gin.Context) {
 		return
 	}
 
-	err = h.Database.FinishCache(repo, cacheID, json.Size)
+	// Check all the parts are good
+	parts, err := h.Database.ValidateUpload(repo, cacheID, json.Size)
 	if err != nil {
-		if errors.Is(err, e.ErrCacheSizeMismatch) {
+		if errors.Is(err, e.ErrCacheSizeMismatch) || errors.Is(err, e.ErrCacheInvalidParts) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
-			log.Error().Err(err).Msg("Failed to finialise cache")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to finialise cache"})
+			log.Error().Err(err).Msg("Failed to finalise cache")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to finalise cache"})
 		}
+		return
+	}
+
+	path, err := h.Storage.Finalise(repo, parts)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to finalise cache file")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to finalise cache file"})
+		return
+	}
+
+	err = h.Database.FinishCache(repo, cacheID, path)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to finalise cache entry")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to finalise cache entry"})
 		return
 	}
 

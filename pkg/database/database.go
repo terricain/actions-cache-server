@@ -10,9 +10,10 @@ import (
 type Backend interface {
 	Type() string
 	SearchCache(repoKey, key, version string, scopes []s.Scope, restoreKeys []string) (s.Cache, error)
-	CreateCache(repoKey, key, version string, scopes []s.Scope) (int, error)
-	FinishCache(repoKey string, id int, size int64) error
-	FinishCacheUpload(repoKey string, id int, size int64, backend, path string) error
+	CreateCache(repoKey, key, version string, scopes []s.Scope, backend string) (int, error)
+	AddUploadPart(repoKey string, id int, part s.CachePart) error
+	ValidateUpload(repoKey string, id int, size int64) ([]s.CachePart, error)
+	FinishCache(repoKey string, id int, path string) error
 }
 
 func GetBackend(backend, connectionString string) (Backend, error) {
