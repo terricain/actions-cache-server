@@ -2,8 +2,9 @@ package storage
 
 import (
 	"errors"
-	"github.com/terrycain/actions-cache-server/pkg/s"
 	"io"
+
+	"github.com/terrycain/actions-cache-server/pkg/s"
 
 	"github.com/gin-gonic/gin"
 	"github.com/terrycain/actions-cache-server/pkg/storage/disk"

@@ -4,20 +4,23 @@ package web
 
 import (
 	"errors"
-	"github.com/rs/zerolog/log"
 	"regexp"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ContentRange struct {
-	Unit string
+	Unit  string
 	Start int
-	End int
-	Size int
+	End   int
+	Size  int
 }
 
-var contentRangeRegex = regexp.MustCompile(`(?m)(\w+) ((\d+)-(\d+)|\*)/(\d+|\*)`)
-var ContentRangeError = errors.New("invalid content-range header")
+var (
+	contentRangeRegex = regexp.MustCompile(`(?m)(\w+) ((\d+)-(\d+)|\*)/(\d+|\*)`)
+	ContentRangeError = errors.New("invalid content-range header")
+)
 
 func ParseContentRange(value string) (ContentRange, error) {
 	result := ContentRange{}
@@ -26,7 +29,7 @@ func ParseContentRange(value string) (ContentRange, error) {
 	if parts == nil {
 		return ContentRange{}, ContentRangeError
 	}
-	if len(parts) != 6 {  // Should never satisfy this but I'm paranoid
+	if len(parts) != 6 { // Should never satisfy this but I'm paranoid
 		log.Error().Msg("Failed to parse Content-Range header, parts regexed is not 6")
 		return ContentRange{}, ContentRangeError
 	}

@@ -124,7 +124,7 @@ func (h *Handlers) UploadCache(c *gin.Context) {
 		return
 	}
 
-	calculatedSize := parsedContentRange.End - (parsedContentRange.Start - 1)  // Seems to be inclusive of the range 0-10/* == 11 bytes
+	calculatedSize := parsedContentRange.End - (parsedContentRange.Start - 1) // Seems to be inclusive of the range 0-10/* == 11 bytes
 	if bytesWritten != int64(calculatedSize) {
 		_ = h.Storage.Delete(repo, partData)
 		log.Error().Int("calculated_size", calculatedSize).Int64("bytes_written", bytesWritten).Msg("Calculated size vs bytes written mismatch")
@@ -134,9 +134,9 @@ func (h *Handlers) UploadCache(c *gin.Context) {
 
 	part := s.CachePart{
 		Start: parsedContentRange.Start,
-		End: parsedContentRange.End,
-		Size: bytesWritten,
-		Data: partData,
+		End:   parsedContentRange.End,
+		Size:  bytesWritten,
+		Data:  partData,
 	}
 	if err = h.Database.AddUploadPart(repo, cacheID, part); err != nil {
 		_ = h.Storage.Delete(repo, partData) // Attempt to clean up file as we've failed to save it to db

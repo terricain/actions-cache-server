@@ -13,9 +13,9 @@ const InsertNewCache = `INSERT INTO cache ("repository","scope","key","version",
 ) RETURNING "cache_id";`
 
 const (
-	SetCacheFinished    = `UPDATE cache SET finished = 1, storage_path = ? WHERE repository = ? AND cache_id = ?;`
-	SearchCacheExact    = `SELECT created_date, storage_backend, storage_path, scope, key, version FROM cache WHERE repository = ? AND scope = ? AND key = ? AND version = ? AND finished = 1;`
-	SearchCachePartial  = `SELECT created_date, storage_backend, storage_path, scope, key, version
+	SetCacheFinished   = `UPDATE cache SET finished = 1, storage_path = ? WHERE repository = ? AND cache_id = ?;`
+	SearchCacheExact   = `SELECT created_date, storage_backend, storage_path, scope, key, version FROM cache WHERE repository = ? AND scope = ? AND key = ? AND version = ? AND finished = 1;`
+	SearchCachePartial = `SELECT created_date, storage_backend, storage_path, scope, key, version
 FROM cache 
 WHERE repository = ? AND scope = ? AND finished = 1
 ORDER BY scope, created_date DESC;`

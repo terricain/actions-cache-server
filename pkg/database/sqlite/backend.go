@@ -157,7 +157,7 @@ func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope, ba
 	return int(cacheID), nil
 }
 
-func (b *Backend)  ValidateUpload(repoKey string, id int, size int64) ([]s.CachePart, error) {
+func (b *Backend) ValidateUpload(repoKey string, id int, size int64) ([]s.CachePart, error) {
 	rows, err := b.db.Query(GetAllParts, repoKey, id)
 	if err != nil {
 		return []s.CachePart{}, err

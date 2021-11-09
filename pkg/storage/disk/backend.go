@@ -2,12 +2,13 @@ package disk
 
 import (
 	"errors"
-	"github.com/terrycain/actions-cache-server/pkg/s"
 	"io"
 	"net/url"
 	"os"
 	p "path"
 	"strings"
+
+	"github.com/terrycain/actions-cache-server/pkg/s"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

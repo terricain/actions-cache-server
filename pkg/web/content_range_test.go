@@ -1,16 +1,17 @@
 package web
 
 import (
-	"github.com/google/go-cmp/cmp"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParseContentRange(t *testing.T) {
 	tables := []struct {
-		name string
-		headerValue string
+		name           string
+		headerValue    string
 		expectedResult ContentRange
-		expectErr bool
+		expectErr      bool
 	}{
 		{"handles satisfiable range", "bytes 0-20/30", ContentRange{"bytes", 0, 20, 30}, false},
 		{"handles range without size", "bytes 10-20/*", ContentRange{"bytes", 10, 20, -1}, false},
@@ -21,7 +22,6 @@ func TestParseContentRange(t *testing.T) {
 
 	for _, table := range tables {
 		t.Run(table.name, func(t *testing.T) {
-
 			result, err := ParseContentRange(table.headerValue)
 			if table.expectErr && err == nil {
 				t.Errorf("Expected error, got nil")
@@ -37,7 +37,5 @@ func TestParseContentRange(t *testing.T) {
 				t.Errorf("TestParseContentRange() mismatch (-want +got):\n%s", diff)
 			}
 		})
-
-
 	}
 }

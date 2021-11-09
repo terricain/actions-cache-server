@@ -17,10 +17,9 @@ type Scope struct {
 	Permission int    `json:"Permission"`
 }
 
-
 type CachePart struct {
 	Start int
-	End int
-	Size int64
-	Data string
+	End   int
+	Size  int64
+	Data  string
 }
