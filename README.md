@@ -70,18 +70,18 @@ docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache 
 
 ## Supported backends
 
-| Type     | Name                 | Supported                      |
-|----------|----------------------|--------------------------------|
-| Database | SQLite               | :heavy_check_mark:             |
-| Database | Postgres             | Planned                        |
-| Database | MySQL                | :x: Will do if there is demand |
-| Database | DynamoDB             | :x: Will do if there is demand |
-| Database | MongoDB              | :x: Will do if there is demand |
-| Database | CosmosDB             | :x: Will do if there is demand |
-| Storage  | Disk                 | :heavy_check_mark:             |
-| Storage  | AWS S3               | :heavy_check_mark:             |
-| Storage  | Azure Blob Storage   | :x: Planned                    |
-| Storage  | Google Cloud Storage | :x: Will do if there is demand |
+| Type     | Name                 | Supported                                             |
+|----------|----------------------|-------------------------------------------------------|
+| Database | SQLite               | :heavy_check_mark:                                    |
+| Database | Postgres             | Planned                                               |
+| Database | MySQL                | :x: Will do if there is demand                        |
+| Database | DynamoDB             | :x: Will do if there is demand                        |
+| Database | MongoDB              | :x: Will do if there is demand                        |
+| Database | CosmosDB             | :x: Will do if there is demand                        |
+| Storage  | Disk                 | :heavy_check_mark:                                    |
+| Storage  | AWS S3               | :x: Temporarily broken (Fixing multipart upload asap) |
+| Storage  | Azure Blob Storage   | :x: Planned                                           |
+| Storage  | Google Cloud Storage | :x: Will do if there is demand                        |
 
 ## What doesn't work
 
