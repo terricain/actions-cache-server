@@ -11,6 +11,11 @@ A high level overview of how the cache action works is as follows (best guess):
 5. `PATCH SOMEHASH/_apis/artifactcache/caches/CACHEID` with a zstandard compressed directory archive
 6. `POST SOMEHASH/_apis/artifactcache/caches/CACHEID` with the filesize JSON to mark the cache as finished
 
+One of the main gotchas here is that the PATCH request can upload multiple chunks if the zstandard archive is greater 
+than the chunk size. The Content-Range header provides info on what byte range the uploaded chunk corresponds to. 
+There becomes a problem of that chunks can be uploaded in parallel and you might receive a later chunk before the first
+etc... so games must be played when uploading the data to whatever storage backend to ensure you can have a complete
+file in the end. See the [backend notes](#backend-notes) for more info on how this is done.
 
 ## GitHub Actions Cache API
 
@@ -158,3 +163,30 @@ Well-Known URL:
 ```
 https://token.actions.githubusercontent.com/.well-known/openid-configuration
 ```
+
+# Database layout
+
+The exact schema will vary between each supported database, read the migrations for a better idea of whats going on. 
+
+In essence, there will be a cache table with metadata about a singular cache entry. There would also be a cache parts
+table which contains info about chunks of a cache archive that is being uploaded which can be used when finalising a 
+cache.
+
+# Backend notes
+## Storage - Disk
+
+Each cache chunk is stored as a file, the filename is recorded as a cache part, then on finalisation the cache parts
+are concatenated together. This could be done better by making use of sparse files and writing at offsets I think.
+
+## Storage - S3
+
+As the chunks can be uploaded in parallel, not in order, a standard multipart upload can't be used as you would not be
+able to compute the part id's in the right order to use. It's a bit inefficient but each part is written out to an object
+and then on finalisation, a multipart upload is started and UploadPartCopy is used which lets you specify an upload part
+which already exists in S3, so on finalisation we know all the part objects we've uploaded, and we know the right order.
+
+## Storage - Azure Blob Storage
+
+Not implemented yet - it looks like we can upload BlockBlobPart's and specify an order of them so that seems like
+it would work. So in theory works similar to S3 apart from it looks like the parts dont need to be uploaded as objects
+in their own right.
