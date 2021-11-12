@@ -30,15 +30,19 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16.x
-#      - name: Run unit tests
-#        run: make test
-#      - name: Check if working tree is dirty
-#        run: |
-#          if [[ $(git diff --stat) != '' ]]; then
-#            echo 'run make test and commit changes'
-#            exit 1
-#          fi
+          go-version: 1.17.x
+      - name: Setup gotestsum
+        uses: autero1/action-gotestsum@v0.1.0
+        with:
+          gotestsum_version: 1.7.0
+      - name: Run Tests
+        run: gotestsum --junitfile junit.xml --format testname
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: junit.xml
+
   helm:
     name: helm-validation
     runs-on: ubuntu-latest
