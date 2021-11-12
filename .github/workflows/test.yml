@@ -32,9 +32,8 @@ jobs:
         with:
           go-version: 1.17.x
       - name: Setup gotestsum
-        uses: autero1/action-gotestsum@v0.1.0
-        with:
-          gotestsum_version: 1.7.0
+        run: go install gotest.tools/gotestsum@v1.7.0
+
       - name: Run Tests
         run: gotestsum --junitfile junit.xml --format testname
       - name: Publish Unit Test Results
