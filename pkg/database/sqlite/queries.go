@@ -1,15 +1,9 @@
 package sqlite
 
-const InsertNewCache = `INSERT INTO cache ("repository","scope","key","version","cache_id","created_date","finished","size", "storage_backend") VALUES (
-  $1,
-  $2,
-  $3,
-  $4,
-  (SELECT IIF(s.m IS NULL, 0, s.m) + 1 FROM (SELECT max(cache_id) AS m FROM cache WHERE repository = $1) s),
-  $5,
-  0,
-  0,
-  $6
+const InsertNewCache = `INSERT INTO cache ("repository","scope","key","version","created_date", "cache_id","finished","size", "storage_backend") VALUES (
+  ?, ?, ?, ?, ?,
+  (SELECT IIF(s.m IS NULL, 0, s.m) + 1 FROM (SELECT max(cache_id) AS m FROM cache WHERE repository = ?) s),
+  0, 0, ?
 ) RETURNING "cache_id";`
 
 const (

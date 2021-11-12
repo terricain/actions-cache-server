@@ -96,7 +96,10 @@ func (b *Backend) SearchCache(repoKey, key, version string, scopes []s.Scope, re
 			}
 		}
 
-		return s.Cache{}, e.ErrNoCacheFound
+		// Not found anything
+		if r.CacheKey == "" {
+			return s.Cache{}, e.ErrNoCacheFound
+		}
 	}
 
 	return r, nil
@@ -119,6 +122,7 @@ func (b *Backend) lookupCacheForScope(repoKey, scope string, restoreKeys []strin
 		potentialCache = append(potentialCache, newCache)
 	}
 
+	log.Debug().Interface("caches", potentialCache).Strs("restoreKeys", restoreKeys).Str("scope", scope).Msg("Potential caches")
 	if err = rows.Err(); err != nil {
 		return s.Cache{}, false, err
 	}
@@ -136,7 +140,9 @@ func (b *Backend) lookupCacheForScope(repoKey, scope string, restoreKeys []strin
 
 func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope, backend string) (int, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
-	result, err := b.db.Exec(InsertNewCache, repoKey, scopes[0].Scope, key, version, now, backend)
+	// err := b.db.QueryRow(SearchCacheExact, repoKey, scopes[0].Scope, key, version).Scan(&r.CreationTime, &r.StorageBackendType, &r.StorageBackendPath, &r.Scope, &r.CacheKey, &r.CacheVersion)
+	var cacheID int64
+	err := b.db.QueryRow(InsertNewCache, repoKey, scopes[0].Scope, key, version, now, repoKey, backend).Scan(&cacheID)
 	if err != nil {
 		var sqliteErr sqlite.Error
 		if errors.As(err, &sqliteErr) {
@@ -149,7 +155,7 @@ func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope, ba
 		return -1, err
 	}
 
-	cacheID, err := result.LastInsertId()
+	log.Debug().Int64("cache_id", cacheID).Msg("Created new cache")
 	if err != nil {
 		return -1, err
 	}
