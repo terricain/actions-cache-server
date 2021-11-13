@@ -2,6 +2,12 @@ package tests
 
 import (
 	"bytes"
+	"math/rand"
+	"net/url"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,11 +18,6 @@ import (
 	"github.com/terrycain/actions-cache-server/pkg/storage"
 	s3backend "github.com/terrycain/actions-cache-server/pkg/storage/aws-s3"
 	"github.com/terrycain/actions-cache-server/pkg/storage/disk"
-	"math/rand"
-	"net/url"
-	"os"
-	"strings"
-	"testing"
 )
 
 func GetDiskBackend(filepath string, t *testing.T) storage.Backend {
@@ -35,12 +36,11 @@ func GetS3Backend(t *testing.T, localstack string) storage.Backend {
 
 	// Create s3 bucket
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
-		Endpoint: aws.String(localstack),
-		DisableSSL: aws.Bool(strings.HasPrefix(localstack, "http://")),
-		Credentials: credentials.NewStaticCredentials("test", "test", ""),
+		Region:           aws.String("us-east-1"),
+		Endpoint:         aws.String(localstack),
+		DisableSSL:       aws.Bool(strings.HasPrefix(localstack, "http://")),
+		Credentials:      credentials.NewStaticCredentials("test", "test", ""),
 		S3ForcePathStyle: aws.Bool(true),
-
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -48,8 +48,8 @@ func GetS3Backend(t *testing.T, localstack string) storage.Backend {
 
 	s3Client := s3.New(sess, sess.Config)
 	_, err = s3Client.CreateBucket(&s3.CreateBucketInput{
-		Bucket:                     aws.String(bucket),
-		CreateBucketConfiguration:  &s3.CreateBucketConfiguration{LocationConstraint: aws.String("eu-west-1")},
+		Bucket:                    aws.String(bucket),
+		CreateBucketConfiguration: &s3.CreateBucketConfiguration{LocationConstraint: aws.String("eu-west-1")},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -88,7 +88,9 @@ func TestStorageBackends(t *testing.T) {
 	// Disk backend
 	t.Run("disk", func(t *testing.T) {
 		testDir, err := os.MkdirTemp(os.TempDir(), "disk-cache-*")
-		if err != nil {t.Fatalf("Failed to create temp dir for disk cache tests: %s", err.Error())}
+		if err != nil {
+			t.Fatalf("Failed to create temp dir for disk cache tests: %s", err.Error())
+		}
 		backend := GetDiskBackend(testDir, t)
 
 		runTests(backend, t)
@@ -105,7 +107,6 @@ func TestStorageBackends(t *testing.T) {
 
 		runTests(backend, t)
 	})
-
 }
 
 func testStorageBackendTypeString(backend storage.Backend) func(t *testing.T) {
@@ -116,11 +117,11 @@ func testStorageBackendTypeString(backend storage.Backend) func(t *testing.T) {
 	}
 }
 
-// testPartUploadDelete Delete would be called if uploading a part completed and then needs to be removed / cleaned up
+// testPartUploadDelete Delete would be called if uploading a part completed and then needs to be removed / cleaned up.
 func testPartUploadDelete(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
-		randBuf := make([]byte, 6 * 1024 * 1024)
+		randBuf := make([]byte, 6*1024*1024)
 
 		if _, err := rand.Read(randBuf); err != nil {
 			t.Fatalf("Failed to generate random file data: %s", err.Error())
@@ -140,11 +141,11 @@ func testPartUploadDelete(backend storage.Backend) func(t *testing.T) {
 	}
 }
 
-// testPartUploadFinalise Tests uploading a part and generating a downloadable url
+// testPartUploadFinalise Tests uploading a part and generating a downloadable url.
 func testPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
-		randBuf := make([]byte, 6 * 1024 * 1024)
+		randBuf := make([]byte, 6*1024*1024)
 
 		if _, err := rand.Read(randBuf); err != nil {
 			t.Fatalf("Failed to generate random file data: %s", err.Error())
@@ -156,7 +157,7 @@ func testPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 			t.Fatalf("Failed to write part: %s", err.Error())
 		}
 
-		parts := []s.CachePart{{0, len(randBuf)-1, int64(len(randBuf)), partData}}
+		parts := []s.CachePart{{Start: 0, End: len(randBuf) - 1, Size: int64(len(randBuf)), Data: partData}}
 		path, err := backend.Finalise(repo, parts)
 		if err != nil {
 			t.Fatalf("Failed to finialise cache archive: %s", err.Error())
@@ -174,14 +175,14 @@ func testPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 	}
 }
 
-// testMultiPartUploadFinalise Tests uploading and concatenating multiple parts and generating a downloadable url
+// testMultiPartUploadFinalise Tests uploading and concatenating multiple parts and generating a downloadable url.
 func testMultiPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
-		randBuf := make([]byte, 6 * 1024 * 1024)
-		randBuf2 := make([]byte, 3 * 1024 * 1024)
+		randBuf := make([]byte, 6*1024*1024)
+		randBuf2 := make([]byte, 3*1024*1024)
 		r1Start := 0
-		r1End := len(randBuf) -1
+		r1End := len(randBuf) - 1
 		r1Size := int64(len(randBuf))
 		r2Start := r1End + 1
 		r2End := r2Start + len(randBuf2) - 1
@@ -206,8 +207,8 @@ func testMultiPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 		}
 
 		parts := []s.CachePart{
-			{r1Start, r1End, r1Size, partData1},
-			{r2Start, r2End, r2Size, partData2},
+			{Start: r1Start, End: r1End, Size: r1Size, Data: partData1},
+			{Start: r2Start, End: r2End, Size: r2Size, Data: partData2},
 		}
 		path, err := backend.Finalise(repo, parts)
 		if err != nil {

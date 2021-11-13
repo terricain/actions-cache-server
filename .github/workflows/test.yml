@@ -24,6 +24,8 @@ jobs:
         image: localstack/localstack
         env:
           SERVICES: s3
+        ports:
+          - 4566-4566
     steps:
       - uses: actions/checkout@v2
       - name: Restore Go cache
@@ -42,7 +44,7 @@ jobs:
       - name: Run Tests
         env:
           # Localstack S3
-          STORAGE_S3: http://localstack:4566
+          STORAGE_S3: http://localhost:${{ job.services.localstack.ports[4566] }}
         run: gotestsum --junitfile junit.xml --format testname
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
