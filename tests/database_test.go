@@ -41,7 +41,7 @@ func GetPostgresBackend(connectionURL string, t *testing.T) db.Backend {
 func TestDatabaseBackends(t *testing.T) {
 	// List of basic tests to cover database backend logic
 	runTests := func(backend db.Backend, t *testing.T) {
-		t.Run("type-string", testTypeString(backend, "sqlite"))
+		t.Run("type-string", testDBBackendTypeString(backend))
 		t.Run("search-cache-exact", testSearchCacheExact(backend))
 		t.Run("search-cache-missing", testSearchMissing(backend))
 		t.Run("search-cache-restorekeys-samebranch", testSearchCacheRestoreKeySameBranch(backend))
@@ -87,10 +87,10 @@ func addCompleteCacheEntry(repo, key, version, path string, scopes []s.Scope, ba
 	return nil
 }
 
-func testTypeString(backend db.Backend, value string) func(t *testing.T) {
+func testDBBackendTypeString(backend db.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
-		if diff := cmp.Diff(value, backend.Type()); diff != "" {
-			t.Fatal(diff)
+		if len(backend.Type()) == 0 {
+			t.Fatal("Backend needs a type string set")
 		}
 	}
 }

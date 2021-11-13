@@ -19,6 +19,11 @@ jobs:
   unittests:
     name: unit-tests
     runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack
+        env:
+          SERVICES: s3
     steps:
       - uses: actions/checkout@v2
       - name: Restore Go cache
@@ -35,6 +40,9 @@ jobs:
         run: go install gotest.tools/gotestsum@v1.7.0
 
       - name: Run Tests
+        env:
+          # Localstack S3
+          STORAGE_S3: http://localstack:4566
         run: gotestsum --junitfile junit.xml --format testname
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1

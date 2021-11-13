@@ -1,4 +1,8 @@
-# Local testing snippets
+# Testing stuff
+
+1. [Local testing snippets](#local-testing-snippets)
+
+## Local testing snippets
 
 Below is a list of curl commands to test the sever.
 
@@ -37,4 +41,20 @@ curl -XPOST \
      'http://localhost:8080/repokey/_apis/artifactcache/caches/1'
 # Should respond with nothing
 
+```
+
+## Running the test suite
+
+go test ./... works, though some env vars and supporting services are needed for various tests.
+
+| Environment Variable | Example Value | Description |
+| `DB_POSTGRES` | `postgres://user:pass@host:port/dbname` | Enables testing the PostgreSQL database backend |
+| `STORAGE_S3`  | `http://localhost:4566` | Enables testing the S3 storage backend, this is the URL to the localstack container |
+
+
+### S3 Localstack
+
+This runs [localstack](https://github.com/localstack/localstack) which should act as a fake S3:
+```shell
+docker run --rm -it -e 'SERVICES=s3' -p 4566:4566 localstack/localstack
 ```

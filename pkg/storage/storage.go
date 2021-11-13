@@ -6,7 +6,6 @@ import (
 
 	"github.com/terrycain/actions-cache-server/pkg/s"
 
-	"github.com/gin-gonic/gin"
 	s3 "github.com/terrycain/actions-cache-server/pkg/storage/aws-s3"
 	"github.com/terrycain/actions-cache-server/pkg/storage/disk"
 )
@@ -19,7 +18,7 @@ type Backend interface {
 
 	// Finalise Takes a list of upload parts, and somehow concatenates them and returns a path which can be passed to GenerateArchiveURL
 	Finalise(repoKey string, parts []s.CachePart) (string, error)
-	GenerateArchiveURL(c *gin.Context, repoKey, path string) (string, error)
+	GenerateArchiveURL(scheme, host, repoKey, path string) (string, error)
 	GetFilePath(key string) (string, error)
 }
 

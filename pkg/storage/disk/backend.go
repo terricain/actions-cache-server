@@ -10,7 +10,6 @@ import (
 
 	"github.com/terrycain/actions-cache-server/pkg/s"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/terrycain/actions-cache-server/pkg/e"
 )
@@ -64,12 +63,12 @@ func (b *Backend) Delete(repoKey, partData string) error {
 	return os.Remove(filePath)
 }
 
-func (b *Backend) GenerateArchiveURL(c *gin.Context, repoKey, path string) (string, error) {
+func (b *Backend) GenerateArchiveURL(scheme, host, repoKey, path string) (string, error) {
 	urlPath := "/archive/" + path
 
 	archiveURL := url.URL{
-		Scheme: c.Request.URL.Scheme,
-		Host:   c.Request.Host,
+		Scheme: scheme,
+		Host:   host,
 		Path:   urlPath,
 	}
 	return archiveURL.String(), nil

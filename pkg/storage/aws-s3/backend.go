@@ -15,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/terrycain/actions-cache-server/pkg/e"
 )
@@ -27,7 +26,6 @@ type Backend struct {
 
 	bucket string
 	prefix string
-	region string
 }
 
 func New(connectionString string) (*Backend, error) {
@@ -41,7 +39,6 @@ func New(connectionString string) (*Backend, error) {
 	backend := Backend{
 		BucketURL: connectionString,
 		Session:   sess,
-		region:    "us-east-1", // Region is calculated in Setup()
 	}
 	return &backend, nil
 }
@@ -61,16 +58,16 @@ func (b *Backend) Setup() error {
 	b.bucket = parsedURL.Host
 	b.prefix = strings.TrimPrefix(parsedURL.Path, "/")
 
-	b.Client = s3.New(b.Session, &aws.Config{Region: aws.String(b.region)})
+	b.Client = s3.New(b.Session, b.Session.Config)
+
 	resp, err := b.Client.GetBucketLocation(&s3.GetBucketLocationInput{Bucket: aws.String(b.bucket)})
 	if err != nil {
 		return err
 	}
 
 	if resp.LocationConstraint != nil {
-		b.region = *resp.LocationConstraint
 		b.Session.Config.Region = resp.LocationConstraint
-		b.Client = s3.New(b.Session, &aws.Config{Region: resp.LocationConstraint})
+		b.Client = s3.New(b.Session, b.Session.Config)
 	}
 
 	return nil
@@ -204,7 +201,7 @@ func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) 
 	return cacheFile, nil
 }
 
-func (b *Backend) GenerateArchiveURL(c *gin.Context, repoKey, path string) (string, error) {
+func (b *Backend) GenerateArchiveURL(scheme, host, repoKey, path string) (string, error) {
 	filePath := p.Join(b.prefix, repoKey, path)
 
 	req, _ := b.Client.GetObjectRequest(&s3.GetObjectInput{

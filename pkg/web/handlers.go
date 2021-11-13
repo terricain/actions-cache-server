@@ -58,7 +58,7 @@ func (h *Handlers) SearchCache(c *gin.Context) {
 		c.Data(http.StatusNoContent, gin.MIMEJSON, nil)
 	}
 
-	archiveURL, err := h.Storage.GenerateArchiveURL(c, repo, cache.StorageBackendPath)
+	archiveURL, err := h.Storage.GenerateArchiveURL(c.Request.URL.Scheme, c.Request.Host, repo, cache.StorageBackendPath)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get archive url")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get archive url"})
