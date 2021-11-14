@@ -21,10 +21,10 @@ var cli struct {
 	StorageS3   string `env:"STORAGE_S3" required:"" xor:"storage" name:"storage-s3" help:"Use S3 storage for cache data e.g. s3://bucket"`
 
 	// Misc
-	LogLevel      string `env:"LOG_LEVEL" default:"info" enum:"debug,info,warn,error"`
-	ListenAddress string `env:"LISTEN_ADDR" default:"0.0.0.0:8080" help:"Listen address e.g. 0.0.0.0:8080"`
+	LogLevel             string `env:"LOG_LEVEL" default:"info" enum:"debug,info,warn,error"`
+	ListenAddress        string `env:"LISTEN_ADDR" default:"0.0.0.0:8080" help:"Listen address e.g. 0.0.0.0:8080"`
 	MetricsListenAddress string `env:"METRICS_LISTEN_ADDR" default:"0.0.0.0:9102" help:"Listen address for prometheus metrics e.g. 0.0.0.0:9102"`
-	Debug         bool   `env:"DEBUG" help:"Enable debug mode"`
+	Debug                bool   `env:"DEBUG" help:"Enable debug mode"`
 }
 
 func main() {
@@ -69,7 +69,7 @@ func main() {
 	router.Use(gin.Recovery(), web.GinLogger(), metrics.PromReqMiddleware())
 	router.Use(web.XForwardedProto("http"))
 
-	go metrics.MetricsServer(cli.MetricsListenAddress)
+	go metrics.Server(cli.MetricsListenAddress)
 
 	router.GET("/healthz", web.HealthCheckEndpoint)
 	router.GET("/ping", web.PingEndpoint)

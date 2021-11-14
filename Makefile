@@ -3,3 +3,7 @@ create-sqlite-migration:
 
 build:
 	go build -o actions-cache-server ./cli/actions-cache-server/main.go
+
+lint:
+	gofumpt -l -w .
+	golangci-lint run

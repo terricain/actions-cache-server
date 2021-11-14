@@ -1,12 +1,13 @@
 package metrics
 
 import (
+	"net/http"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
-func MetricsServer(listenAddr string) {
+func Server(listenAddr string) {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	log.Info().Msgf("Serving metrics on %s", listenAddr)
@@ -15,5 +16,4 @@ func MetricsServer(listenAddr string) {
 	} else {
 		log.Info().Msg("Finished listening for metrics")
 	}
-
 }

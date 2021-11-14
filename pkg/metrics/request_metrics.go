@@ -4,34 +4,35 @@
 package metrics
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var reqCount = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name:        "http_requests_total",
-	Help:        "How many HTTP requests processed, partitioned by status code and HTTP method",
+	Name: "http_requests_total",
+	Help: "How many HTTP requests processed, partitioned by status code and HTTP method",
 }, []string{"code", "method", "handler", "host", "url"})
 
 var reqDur = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-	Name:        "http_request_duration_seconds",
-	Help:        "The HTTP request latencies in seconds",
+	Name: "http_request_duration_seconds",
+	Help: "The HTTP request latencies in seconds",
 	//	Labels:        ,
 	// Buckets:     nil,
 }, []string{"code", "method", "url"})
 
 var respSize = prometheus.NewSummary(prometheus.SummaryOpts{
-	Name:        "http_response_size_bytes",
-	Help:        "The HTTP response sizes in bytes",
+	Name: "http_response_size_bytes",
+	Help: "The HTTP response sizes in bytes",
 })
 
 var reqSize = prometheus.NewSummary(prometheus.SummaryOpts{
-	Name:        "http_request_size_bytes",
-	Help:        "The HTTP request sizes in bytes",
+	Name: "http_request_size_bytes",
+	Help: "The HTTP request sizes in bytes",
 })
 
 func requestPathMapper(c *gin.Context) string {
