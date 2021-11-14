@@ -26,6 +26,8 @@ spec:
     metadata:
       {{- if .Values.deployment.podAnnotations }}
       annotations:
+        prometheus.io/scrape: '{{ .Values.deployment.metrics.enabled }}'
+        prometheus.io/port: '{{ .Values.deployment.metrics.port }}'
         {{ toYaml .Values.deployment.podAnnotations | nindent 8 }}
       {{- end }}
       labels:

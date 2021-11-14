@@ -90,12 +90,10 @@ idea how to make it work nor the intention to. If someone really needs this, the
 
 Roadmap sounds better than a glorified todo list :smile:
 
-* Basic metrics
-* Postgres backend
-* Azure Blob Storage backend
-* Plan out and implement end-to-end tests
-* Unit tests of some description
-* Cache space usage / management
+* Plan out and implement end-to-end tests 
+* Postgres backend 
+* Azure Blob Storage backend 
+* Cache space usage / management 
 * Benchmark cpu and memory usage especially on large PATCH's
 
 ## Contributing

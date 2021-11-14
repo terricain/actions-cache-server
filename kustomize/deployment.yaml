@@ -12,6 +12,9 @@ spec:
   minReadySeconds: 0
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9102'
       labels:
         app: actions-cache-server
     spec:

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/terrycain/actions-cache-server/pkg/database"
+	"github.com/terrycain/actions-cache-server/pkg/metrics"
 	"github.com/terrycain/actions-cache-server/pkg/storage"
 	"github.com/terrycain/actions-cache-server/pkg/utils/logging"
 	"github.com/terrycain/actions-cache-server/pkg/web"
@@ -22,6 +23,7 @@ var cli struct {
 	// Misc
 	LogLevel      string `env:"LOG_LEVEL" default:"info" enum:"debug,info,warn,error"`
 	ListenAddress string `env:"LISTEN_ADDR" default:"0.0.0.0:8080" help:"Listen address e.g. 0.0.0.0:8080"`
+	MetricsListenAddress string `env:"METRICS_LISTEN_ADDR" default:"0.0.0.0:9102" help:"Listen address for prometheus metrics e.g. 0.0.0.0:9102"`
 	Debug         bool   `env:"DEBUG" help:"Enable debug mode"`
 }
 
@@ -64,8 +66,10 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(gin.Recovery(), web.GinLogger())
+	router.Use(gin.Recovery(), web.GinLogger(), metrics.PromReqMiddleware())
 	router.Use(web.XForwardedProto("http"))
+
+	go metrics.MetricsServer(cli.MetricsListenAddress)
 
 	router.GET("/healthz", web.HealthCheckEndpoint)
 	router.GET("/ping", web.PingEndpoint)

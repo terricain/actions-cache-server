@@ -29,6 +29,10 @@ deployment:
   ##       key: username
   env: []
 
+  metrics:
+    enabled: true
+    port: 9102
+
   podName: "app"
   podAnnotations: {}
     # iam.amazonaws.com/role: actions-cache-server

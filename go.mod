@@ -15,6 +15,7 @@ require (
 	github.com/lestrrat-go/jwx v1.2.9
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.9
+	github.com/prometheus/client_golang v1.7.1
 	github.com/rs/zerolog v1.26.0
 	github.com/ugorji/go v1.2.6 // indirect
 	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
