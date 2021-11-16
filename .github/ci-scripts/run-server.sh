@@ -6,7 +6,7 @@ database="$2"
 case $storage in
 s3)
   localstack_encoded=$(python -c "import urllib; print urllib.quote('''$LOCALSTACK''')")
-  STORAGE_S3="s3://some-bucket/prefix/?forces3path=1&endpoint=${localstack_encoded}"
+  STORAGE_S3="s3://some-bucket/prefix/?localstack=${localstack_encoded}"
   export STORAGE_S3
 
   export AWS_ACCESS_KEY_ID=test

@@ -2,6 +2,7 @@ package awss3
 
 import (
 	"errors"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"io"
 	"net/url"
 	p "path"
@@ -54,9 +55,13 @@ func (b *Backend) Setup() error {
 		//goland:noinspection GoErrorStringFormat
 		return errors.New("S3 url should be in the format of s3://bucket/prefix")
 	}
+	queryParams := parsedURL.Query()
 
 	// Used if e2e testing with localstack
-	if strings.Contains(parsedURL.RawQuery, "forces3path") {
+	if ls := queryParams.Get("localstack"); ls != "" {
+		b.Session.Config.Endpoint = aws.String(ls)
+		b.Session.Config.DisableSSL = aws.Bool(strings.HasPrefix(ls, "http://"))
+		b.Session.Config.Credentials = credentials.NewStaticCredentials("test", "test", "")
 		b.Session.Config.S3ForcePathStyle = aws.Bool(true)
 	}
 

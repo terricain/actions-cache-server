@@ -57,15 +57,19 @@ func GetS3Backend(t *testing.T, localstack string) storage.Backend {
 		t.Fatal(err)
 	}
 
-	URL := "s3://" + bucket + "/someprefix"
+	query := url.Values{}
+	query.Add("localstack", localstack)
+	URL := url.URL{
+		Scheme:      "s3",
+		Host:        bucket,
+		Path:        "someprefix",
+		RawQuery: query.Encode(),
+	}
 
-	backend, err := s3backend.New(URL)
+	backend, err := s3backend.New(URL.String())
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// Replace backend session with the one that has credentials
-	backend.Session = sess
 
 	if err = backend.Setup(); err != nil {
 		t.Fatal(err)
