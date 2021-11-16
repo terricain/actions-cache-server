@@ -26,6 +26,7 @@ func TestMain(m *testing.M) {
 }
 
 func GetSQLiteBackend(filepath string, t *testing.T) db.Backend {
+	t.Helper()
 	backend, err := dbsqlite.NewSQLiteBackend(filepath)
 	if err != nil {
 		t.Fatal(err)
@@ -34,6 +35,7 @@ func GetSQLiteBackend(filepath string, t *testing.T) db.Backend {
 }
 
 func GetPostgresBackend(connectionURL string, t *testing.T) db.Backend {
+	t.Helper()
 	t.Fatal("Not implemented yet")
 	return nil
 }
@@ -72,19 +74,19 @@ func TestDatabaseBackends(t *testing.T) {
 	})
 }
 
-func addCompleteCacheEntry(repo, key, version, path string, scopes []s.Scope, backend db.Backend) error {
+func addCompleteCacheEntry(repo, key, version, path string, scopes []s.Scope, backend db.Backend, t *testing.T) {
+	t.Helper()
 	log.Debug().Str("repo", repo).Str("key", key).Str("version", version).Interface("scopes", scopes).Msg("Adding cache")
 	// Create cache entry
 	cacheID, err := backend.CreateCache(repo, key, version, scopes, "somedb")
 	if err != nil {
-		return err
+		t.Fatalf("Failed to create cache entry: %s", err.Error())
 	}
 
 	// Finalise cache entry
 	if err = backend.FinishCache(repo, cacheID, path); err != nil {
-		return err
+		t.Fatalf("Failed to finish cache entry: %s", err.Error())
 	}
-	return nil
 }
 
 func testDBBackendTypeString(backend db.Backend) func(t *testing.T) {
@@ -103,9 +105,7 @@ func testSearchCacheExact(backend db.Backend) func(t *testing.T) {
 		scopes := []s.Scope{{Scope: "refs/heads/master", Permission: 3}}
 
 		// Add entry
-		if err := addCompleteCacheEntry(repo, key, version, "somepath1", scopes, backend); err != nil {
-			t.Fatalf("Failed to add cache entry: %s", err.Error())
-		}
+		addCompleteCacheEntry(repo, key, version, "somepath1", scopes, backend, t)
 
 		cache, err := backend.SearchCache(repo, key, version, scopes, []string{})
 		if err != nil {
@@ -131,9 +131,7 @@ func testSearchMissing(backend db.Backend) func(t *testing.T) {
 		scopes := []s.Scope{{Scope: "refs/heads/master", Permission: 3}}
 
 		// Add entry
-		if err := addCompleteCacheEntry(repo, key, version, "somepatha", scopes, backend); err != nil {
-			t.Fatalf("Failed to add cache entry: %s", err.Error())
-		}
+		addCompleteCacheEntry(repo, key, version, "somepatha", scopes, backend, t)
 
 		_, err := backend.SearchCache(repo, key2, version2, scopes, []string{})
 		if err == nil {
@@ -156,9 +154,7 @@ func testSearchCacheRestoreKeySameBranch(backend db.Backend) func(t *testing.T) 
 		scopes := []s.Scope{{Scope: "refs/heads/master", Permission: 3}}
 
 		// Add entry
-		if err := addCompleteCacheEntry(repo, key, version, "somepathb", scopes, backend); err != nil {
-			t.Fatalf("Failed to add cache entry: %s", err.Error())
-		}
+		addCompleteCacheEntry(repo, key, version, "somepathb", scopes, backend, t)
 
 		cache, err := backend.SearchCache(repo, key2, version2, scopes, []string{"some-prefix-"})
 		if err != nil {
@@ -185,9 +181,7 @@ func testSearchCacheRestoreKeyDifferentBranch(backend db.Backend) func(t *testin
 		scopes2 := []s.Scope{{Scope: "refs/heads/test", Permission: 3}, {Scope: "refs/heads/master", Permission: 1}}
 
 		// Add entry
-		if err := addCompleteCacheEntry(repo, key, version, "somepathn", scopes, backend); err != nil {
-			t.Fatalf("Failed to add cache entry: %s", err.Error())
-		}
+		addCompleteCacheEntry(repo, key, version, "somepathn", scopes, backend, t)
 
 		cache, err := backend.SearchCache(repo, key2, version2, scopes2, []string{"some-prefix-"})
 		if err != nil {
@@ -211,9 +205,7 @@ func testDuplicateCreate(backend db.Backend) func(t *testing.T) {
 		scopes := []s.Scope{{Scope: "refs/heads/master", Permission: 3}}
 
 		// Add entry
-		if err := addCompleteCacheEntry(repo, key, version, "somepath", scopes, backend); err != nil {
-			t.Fatalf("Failed to add cache entry: %s", err.Error())
-		}
+		addCompleteCacheEntry(repo, key, version, "somepath", scopes, backend, t)
 
 		_, err := backend.CreateCache(repo, key, version, scopes, "somedb")
 		if err == nil {

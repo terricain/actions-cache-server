@@ -21,6 +21,7 @@ import (
 )
 
 func GetDiskBackend(filepath string, t *testing.T) storage.Backend {
+	t.Helper()
 	backend, err := disk.New(filepath)
 	if err != nil {
 		t.Fatal(err)
@@ -32,6 +33,7 @@ func GetDiskBackend(filepath string, t *testing.T) storage.Backend {
 }
 
 func GetS3Backend(t *testing.T, localstack string) storage.Backend {
+	t.Helper()
 	bucket := uuid.NewString()
 
 	// Create s3 bucket

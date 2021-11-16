@@ -55,6 +55,11 @@ func (b *Backend) Setup() error {
 		return errors.New("S3 url should be in the format of s3://bucket/prefix")
 	}
 
+	// Used if e2e testing with localstack
+	if strings.Contains(parsedURL.RawQuery, "forces3path") {
+		b.Session.Config.S3ForcePathStyle = aws.Bool(true)
+	}
+
 	b.bucket = parsedURL.Host
 	b.prefix = strings.TrimPrefix(parsedURL.Path, "/")
 
