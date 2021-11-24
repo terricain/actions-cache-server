@@ -1,6 +1,9 @@
 # Testing stuff
 
 1. [Local testing snippets](#local-testing-snippets)
+2. [Running the test suite](#running-the-test-suite)
+   1. [S3 Localstack](#s3-localstack)
+   2. [Postgres](#postgres)
 
 ## Local testing snippets
 

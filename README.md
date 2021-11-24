@@ -53,7 +53,7 @@ probably not want to read/write to it from multiple processes (albeit the docs s
 
 Docker image: `ghcr.io/terrycain/actions-cache-server:0.1.3` ([image repo](https://github.com/terrycain/actions-cache-server/pkgs/container/actions-cache-server) if I forget to update the image tag)
 
-Running --help on the container will list all arguments it takes, which all can be defined as environment variables. You will need to specify a `--db-something` and `--storage-somthing` argument. 
+Running --help on the container will list all arguments it takes, which all can be defined as environment variables. You will need to specify a `--db-something` and `--storage-something` argument. 
 See [BACKENDS.md](BACKENDS.md) for a more detailed description of each backend and the format of the args.
 
 Example deployment using Docker which will use SQLite and basic disk storage.

@@ -4,7 +4,7 @@
 | Database | CLI Argument    | Environment Variable | Description             | Example Value                                     |
 |----------|-----------------|----------------------|-------------------------|---------------------------------------------------|
 | SQLite   | `--db-sqlite`   | `DB_SQLITE`          | SQLite database         | `/tmp/db.sqlite`                                  |
-| Postgres | `--db-postgres` | `DB_POSTGRES`        | **not implemented yet** | `postgresql://user:pass@host:port/dbname?options` |
+| Postgres | `--db-postgres` | `DB_POSTGRES`        | PostgreSQL database     | `postgresql://user:pass@host:port/dbname?options` |
 
 Examples deployments coming soon
 
