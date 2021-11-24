@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 
+	"github.com/terrycain/actions-cache-server/pkg/database/postgres"
 	"github.com/terrycain/actions-cache-server/pkg/database/sqlite"
 	"github.com/terrycain/actions-cache-server/pkg/s"
 )
@@ -20,6 +21,8 @@ func GetBackend(backend, connectionString string) (Backend, error) {
 	switch backend {
 	case "sqlite":
 		return sqlite.NewSQLiteBackend(connectionString)
+	case "postgres":
+		return postgres.NewPostgresBackend(connectionString)
 	default:
 		return nil, errors.New("invalid storage backend")
 	}

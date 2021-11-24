@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	db "github.com/terrycain/actions-cache-server/pkg/database"
+	dbpostgres "github.com/terrycain/actions-cache-server/pkg/database/postgres"
 	dbsqlite "github.com/terrycain/actions-cache-server/pkg/database/sqlite"
 	"github.com/terrycain/actions-cache-server/pkg/e"
 	"github.com/terrycain/actions-cache-server/pkg/s"
@@ -26,7 +27,6 @@ func TestMain(m *testing.M) {
 }
 
 func GetSQLiteBackend(filepath string, t *testing.T) db.Backend {
-	t.Helper()
 	backend, err := dbsqlite.NewSQLiteBackend(filepath)
 	if err != nil {
 		t.Fatal(err)
@@ -35,9 +35,11 @@ func GetSQLiteBackend(filepath string, t *testing.T) db.Backend {
 }
 
 func GetPostgresBackend(connectionURL string, t *testing.T) db.Backend {
-	t.Helper()
-	t.Fatal("Not implemented yet")
-	return nil
+	backend, err := dbpostgres.NewPostgresBackend(connectionURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return backend
 }
 
 func TestDatabaseBackends(t *testing.T) {

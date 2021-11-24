@@ -1,4 +1,4 @@
-package sqlite
+package postgres
 
 import (
 	"database/sql"
@@ -8,13 +8,12 @@ import (
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
-	gomigratesqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
+	gomigratepostgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	_ "github.com/mattn/go-sqlite3" // initialises sqlite3
-	sqlite "github.com/mattn/go-sqlite3"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq" // initialises postgres
 	"github.com/rs/zerolog/log"
 	"github.com/terrycain/actions-cache-server/pkg/e"
-
 	"github.com/terrycain/actions-cache-server/pkg/s"
 )
 
@@ -25,8 +24,8 @@ type Backend struct {
 	db *sql.DB
 }
 
-func NewSQLiteBackend(connectionString string) (*Backend, error) {
-	db, err := sql.Open("sqlite3", connectionString)
+func NewPostgresBackend(connectionString string) (*Backend, error) {
+	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		return &Backend{}, err
 	}
@@ -42,10 +41,10 @@ func NewSQLiteBackend(connectionString string) (*Backend, error) {
 	return &backend, nil
 }
 
-func (b *Backend) Type() string { return "sqlite" }
+func (b *Backend) Type() string { return "postgres" }
 
 func (b *Backend) Migrate() error {
-	driver, err := gomigratesqlite.WithInstance(b.db, &gomigratesqlite.Config{})
+	driver, err := gomigratepostgres.WithInstance(b.db, &gomigratepostgres.Config{})
 	if err != nil {
 		return err
 	}
@@ -137,12 +136,12 @@ func (b *Backend) CreateCache(repoKey, key, version string, scopes []s.Scope, ba
 	now := time.Now().UTC().Format(time.RFC3339)
 	// err := b.db.QueryRow(SearchCacheExact, repoKey, scopes[0].Scope, key, version).Scan(&r.CreationTime, &r.StorageBackendType, &r.StorageBackendPath, &r.Scope, &r.CacheKey, &r.CacheVersion)
 	var cacheID int64
-	err := b.db.QueryRow(InsertNewCache, repoKey, scopes[0].Scope, key, version, now, repoKey, backend).Scan(&cacheID)
+	err := b.db.QueryRow(InsertNewCache, repoKey, scopes[0].Scope, key, version, now, backend).Scan(&cacheID)
 	if err != nil {
-		var sqliteErr sqlite.Error
-		if errors.As(err, &sqliteErr) {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
 			// Trying to start cache twice
-			if errors.Is(sqliteErr.ExtendedCode, sqlite.ErrConstraintPrimaryKey) {
+			if pqErr.Code == "23505" {
 				return -1, e.ErrCacheAlreadyExists
 			}
 		}

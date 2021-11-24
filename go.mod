@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/lestrrat-go/jwx v1.2.9
+	github.com/lib/pq v1.10.0
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.9
 	github.com/prometheus/client_golang v1.7.1
