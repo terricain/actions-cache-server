@@ -60,9 +60,9 @@ func GetS3Backend(t *testing.T, localstack string) storage.Backend {
 	query := url.Values{}
 	query.Add("localstack", localstack)
 	URL := url.URL{
-		Scheme:      "s3",
-		Host:        bucket,
-		Path:        "someprefix",
+		Scheme:   "s3",
+		Host:     bucket,
+		Path:     "someprefix",
 		RawQuery: query.Encode(),
 	}
 

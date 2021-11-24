@@ -2,13 +2,14 @@ package awss3
 
 import (
 	"errors"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"io"
 	"net/url"
 	p "path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
 
 	"github.com/terrycain/actions-cache-server/pkg/s"
 
