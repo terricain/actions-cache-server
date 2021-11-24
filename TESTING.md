@@ -53,9 +53,19 @@ go test ./... works, though some env vars and supporting services are needed for
 
 To generate the Mocks for the storage backends, run `make generate_mocks`
 
+TODO add commands for filtering the tests
+
 ### S3 Localstack
 
 This runs [localstack](https://github.com/localstack/localstack) which should act as a fake S3:
 ```shell
-docker run --rm -it -e 'SERVICES=s3' -p 4566:4566 localstack/localstack
+docker run --rm -it -e 'SERVICES=s3' -p 4566:4566 docker.io/localstack/localstack:latest
+```
+
+### Postgres
+
+Running a postgres container for the postgres tests
+```shell
+docker run --rm -it -e 'POSTGRES_DB=actionscache' -e 'POSTGRES_PASSWORD=postgres' -p 5432:5432 docker.io/library/postgres:14
+export DB_POSTGRES='postgres://postgres:postgres@localhost:5432/actionscache?sslmode=disable'
 ```

@@ -101,7 +101,7 @@ Roadmap sounds better than a glorified todo list :smile:
 Feel free to raise Pull Requests. For any major changes please raise an issue so that they can be discussed and avoid any
 duplication of work etc...
 
-Obviously update/add tests where appropriate.
+Obviously update/add tests where appropriate. Some info around testing is [here](TESTING.md)
 
 ## License
 [Apache 2.0](https://choosealicense.com/licenses/apache-2.0/)

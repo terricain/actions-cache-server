@@ -1,5 +1,8 @@
 create-sqlite-migration:
 	migrate create -ext sql -dir pkg/database/sqlite/migrations -seq $(NAME)
+create-postgres-migration:
+	migrate create -ext sql -dir pkg/database/postgres/migrations -seq $(NAME)
+
 
 build:
 	go build -o actions-cache-server ./cli/actions-cache-server/main.go
