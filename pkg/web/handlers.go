@@ -67,7 +67,7 @@ func (h *Handlers) SearchCache(c *gin.Context) {
 	cache.ArchiveLocation = archiveURL
 	log.Debug().Str("url", cache.ArchiveLocation).Msg("Archive location")
 
-	c.JSON(http.StatusCreated, cache)
+	c.JSON(http.StatusOK, cache)
 }
 
 type StartCacheRequest struct {

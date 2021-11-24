@@ -7,3 +7,7 @@ build:
 lint:
 	gofumpt -l -w .
 	golangci-lint run
+
+generate_mocks:
+	mockgen -package=mock_backend -mock_names='Backend=MockStorageBackend' -destination tests/mock_backend/storage.go github.com/terrycain/actions-cache-server/pkg/storage Backend
+	mockgen -package=mock_backend -mock_names='Backend=MockDatabaseBackend' -destination tests/mock_backend/database.go github.com/terrycain/actions-cache-server/pkg/database Backend

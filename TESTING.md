@@ -51,6 +51,7 @@ go test ./... works, though some env vars and supporting services are needed for
 | `DB_POSTGRES` | `postgres://user:pass@host:port/dbname` | Enables testing the PostgreSQL database backend |
 | `STORAGE_S3`  | `http://localhost:4566` | Enables testing the S3 storage backend, this is the URL to the localstack container |
 
+To generate the Mocks for the storage backends, run `make generate_mocks`
 
 ### S3 Localstack
 

@@ -2,10 +2,8 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/terrycain/actions-cache-server/pkg/database"
-	"github.com/terrycain/actions-cache-server/pkg/metrics"
 	"github.com/terrycain/actions-cache-server/pkg/storage"
 	"github.com/terrycain/actions-cache-server/pkg/utils/logging"
 	"github.com/terrycain/actions-cache-server/pkg/web"
@@ -64,25 +62,7 @@ func main() {
 		Debug:    cli.Debug,
 	}
 
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	router.Use(gin.Recovery(), web.GinLogger(), metrics.PromReqMiddleware())
-	router.Use(web.XForwardedProto("http"))
-
-	go metrics.Server(cli.MetricsListenAddress)
-
-	router.GET("/healthz", web.HealthCheckEndpoint)
-	router.GET("/ping", web.PingEndpoint)
-
-	authedGroup := router.Group("/:repo")
-	authedGroup.Use(handlers.AuthRequired())
-	authedGroup.GET("/_apis/artifactcache/cache", handlers.SearchCache)
-	authedGroup.POST("/_apis/artifactcache/caches", handlers.StartCache)
-	authedGroup.PATCH("/_apis/artifactcache/caches/:cacheid", handlers.UploadCache)
-	authedGroup.POST("/_apis/artifactcache/caches/:cacheid", handlers.FinishCache)
-
-	// Not authed
-	router.GET("/archive/:key", handlers.ArchivePath)
+	router := web.GetRouter(cli.MetricsListenAddress, handlers, true)
 
 	log.Info().Msgf("Listening on %s", cli.ListenAddress)
 	if err = router.Run(cli.ListenAddress); err != nil {
