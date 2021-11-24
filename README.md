@@ -71,7 +71,7 @@ docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache 
 | Type     | Name                 | Supported                                             |
 |----------|----------------------|-------------------------------------------------------|
 | Database | SQLite               | :heavy_check_mark:                                    |
-| Database | Postgres             | Planned                                               |
+| Database | Postgres             | :heavy_check_mark:                                    |
 | Database | MySQL                | :x: Will do if there is demand                        |
 | Database | DynamoDB             | :x: Will do if there is demand                        |
 | Database | MongoDB              | :x: Will do if there is demand                        |
@@ -90,8 +90,6 @@ idea how to make it work nor the intention to. If someone really needs this, the
 
 Roadmap sounds better than a glorified todo list :smile:
 
-* Plan out and implement end-to-end tests 
-* Postgres backend 
 * Azure Blob Storage backend 
 * Cache space usage / management 
 * Benchmark cpu and memory usage especially on large PATCH's
