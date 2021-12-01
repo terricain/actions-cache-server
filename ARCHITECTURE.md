@@ -185,8 +185,11 @@ able to compute the part id's in the right order to use. It's a bit inefficient 
 and then on finalisation, a multipart upload is started and UploadPartCopy is used which lets you specify an upload part
 which already exists in S3, so on finalisation we know all the part objects we've uploaded, and we know the right order.
 
+Would be nice to just use the bytes start integer from the header during chunk upload as that would be in order, but sadly
+the multipart upload id needs to be between 1 and 10000.
+
 ## Storage - Azure Blob Storage
 
-Not implemented yet - it looks like we can upload BlockBlobPart's and specify an order of them so that seems like
-it would work. So in theory works similar to S3 apart from it looks like the parts dont need to be uploaded as objects
-in their own right.
+Works really well, not surprisingly as Microsoft acquired GitHub and the artifacts stuff looks looted from Azure Pipelines stuff.
+Chunks are uploaded as parts of a file and then the part ids are submitted and are concatenated in the order in which you give the
+list :D.

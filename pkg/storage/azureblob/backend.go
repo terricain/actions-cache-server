@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 
 	"github.com/terrycain/actions-cache-server/pkg/s"
@@ -118,9 +116,6 @@ func (b *Backend) Write(repoKey string, cacheID int, r io.Reader, start, end int
 		_ = f.Close()
 		_ = os.Remove(name)
 	}()
-
-	a, _ := blobClient.GetBlockList(context.Background(), azblob.BlockListTypeAll, &azblob.GetBlockListOptions{})
-	log.Info().Interface("a", a).Msg("a")
 
 	if _, err = f.ReadFrom(r); err != nil {
 		return "", 0, err
