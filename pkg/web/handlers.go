@@ -118,7 +118,7 @@ func (h *Handlers) UploadCache(c *gin.Context) {
 	}
 	calculatedSize := int64(parsedContentRange.End - (parsedContentRange.Start - 1)) // Seems to be inclusive of the range 0-10/* == 11 bytes
 
-	partData, bytesWritten, err := h.Storage.Write(repo, c.Request.Body, parsedContentRange.Start, parsedContentRange.End, calculatedSize)
+	partData, bytesWritten, err := h.Storage.Write(repo, cacheID, c.Request.Body, parsedContentRange.Start, parsedContentRange.End, calculatedSize)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to store file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to store file"})
@@ -178,7 +178,7 @@ func (h *Handlers) FinishCache(c *gin.Context) {
 		return
 	}
 
-	path, err := h.Storage.Finalise(repo, parts)
+	path, err := h.Storage.Finalise(repo, cacheID, parts)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to finalise cache file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to finalise cache file"})

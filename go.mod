@@ -3,6 +3,7 @@ module github.com/terrycain/actions-cache-server
 go 1.16
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.2.0
 	github.com/alecthomas/kong v0.2.18
 	github.com/aws/aws-sdk-go v1.42.12
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect

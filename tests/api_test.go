@@ -182,7 +182,7 @@ func TestUploadCache(t *testing.T) {
 		Data:  "partData",
 	}
 
-	storage.EXPECT().Write(repoKey, gomock.Any(), 0, size-1, int64(size)).
+	storage.EXPECT().Write(repoKey, 5, gomock.Any(), 0, size-1, int64(size)).
 		Times(1).
 		Return("partData", int64(size), nil)
 
@@ -224,7 +224,7 @@ func TestFinishCache(t *testing.T) {
 		Times(1).
 		Return(cacheParts, nil)
 
-	storage.EXPECT().Finalise(repoKey, cacheParts).
+	storage.EXPECT().Finalise(repoKey, 5, cacheParts).
 		Times(1).
 		Return("path", nil)
 

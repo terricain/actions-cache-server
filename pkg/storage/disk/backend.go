@@ -38,7 +38,7 @@ func (b *Backend) Type() string {
 	return "disk"
 }
 
-func (b *Backend) Write(repoKey string, r io.Reader, start, end int, size int64) (string, int64, error) {
+func (b *Backend) Write(repoKey string, cacheID int, r io.Reader, start, end int, size int64) (string, int64, error) {
 	cacheFile := uuid.New().String()
 	filePath := p.Join(b.BaseDir, cacheFile)
 
@@ -74,7 +74,7 @@ func (b *Backend) GenerateArchiveURL(scheme, host, repoKey, path string) (string
 	return archiveURL.String(), nil
 }
 
-func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) {
+func (b *Backend) Finalise(repoKey string, cacheID int, parts []s.CachePart) (string, error) {
 	cacheFile := uuid.New().String()
 	filePath := p.Join(b.BaseDir, cacheFile)
 
