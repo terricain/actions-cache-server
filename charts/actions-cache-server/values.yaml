@@ -2,7 +2,7 @@
 name: actions-cache-server
 image:
   repository: ghcr.io/terrycain/actions-cache-server
-  tag: 0.1.6
+  tag: 0.1.7
   pullPolicy: IfNotPresent
 
 imagePullSecrets:

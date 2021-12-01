@@ -51,7 +51,7 @@ server with some degree of modularity in mind so that it can fit in whatever env
 backends to choose from. There will be some tradeoffs depending on what combination you choose, e.g. if you choose SQLite for the database, you'll
 probably not want to read/write to it from multiple processes (albeit the docs seems to claim this works now :/).
 
-Docker image: `ghcr.io/terrycain/actions-cache-server:0.1.3` ([image repo](https://github.com/terrycain/actions-cache-server/pkgs/container/actions-cache-server) if I forget to update the image tag)
+Docker image: `ghcr.io/terrycain/actions-cache-server:0.1.7` ([image repo](https://github.com/terrycain/actions-cache-server/pkgs/container/actions-cache-server) if I forget to update the image tag)
 
 Running --help on the container will list all arguments it takes, which all can be defined as environment variables. You will need to specify a `--db-something` and `--storage-something` argument. 
 See [BACKENDS.md](BACKENDS.md) for a more detailed description of each backend and the format of the args.

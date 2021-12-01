@@ -4,6 +4,7 @@
 2. [Running the test suite](#running-the-test-suite)
    1. [S3 Localstack](#s3-localstack)
    2. [Postgres](#postgres)
+   3. [Azure Blob Storage](#azure-blob-storage)
 
 ## Local testing snippets
 
@@ -50,9 +51,10 @@ curl -XPOST \
 
 go test ./... works, though some env vars and supporting services are needed for various tests.
 
-| Environment Variable | Example Value | Description |
-| `DB_POSTGRES` | `postgres://user:pass@host:port/dbname` | Enables testing the PostgreSQL database backend |
-| `STORAGE_S3`  | `http://localhost:4566` | Enables testing the S3 storage backend, this is the URL to the localstack container |
+| Environment Variable | Example Value                           | Description                                                                                                            |
+| `DB_POSTGRES`        | `postgres://user:pass@host:port/dbname` | Enables testing the PostgreSQL database backend                                                                        |
+| `STORAGE_S3`         | `http://localhost:4566`                 | Enables testing the S3 storage backend, this is the URL to the localstack container                                    |
+| `STORAGE_AZUREBLOB`  | `ConnectionString;Container=blah`       | Enables testing the Azure Blob Storage backend, this needs to be a connection string for a live blob storage container |
 
 To generate the Mocks for the storage backends, run `make generate_mocks`
 
@@ -72,3 +74,7 @@ Running a postgres container for the postgres tests
 docker run --rm -it -e 'POSTGRES_DB=actionscache' -e 'POSTGRES_PASSWORD=postgres' -p 5432:5432 docker.io/library/postgres:14
 export DB_POSTGRES='postgres://postgres:postgres@localhost:5432/actionscache?sslmode=disable'
 ```
+
+### Azure Blob Storage
+
+Azure Blob Storage needs a live blob storage account sadly.
