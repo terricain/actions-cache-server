@@ -78,7 +78,7 @@ docker run --rm -it -p8080:8080 -v $(pwd)/db:/tmp/db -v $(pwd)/cache:/tmp/cache 
 | Database | CosmosDB             | :x: Will do if there is demand                        |
 | Storage  | Disk                 | :heavy_check_mark:                                    |
 | Storage  | AWS S3               | :heavy_check_mark:                                    |
-| Storage  | Azure Blob Storage   | :x: Planned                                           |
+| Storage  | Azure Blob Storage   | :heavy_check_mark:                                    |
 | Storage  | Google Cloud Storage | :x: Will do if there is demand                        |
 
 ## What doesn't work

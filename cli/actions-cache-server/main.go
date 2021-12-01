@@ -15,8 +15,9 @@ var cli struct {
 	DBPostgres string `env:"DB_POSTGRES" required:"" xor:"db" help:"Postgres URI e.g. postgresql://blah"`
 
 	// Storage backends
-	StorageDisk string `env:"STORAGE_DISK" required:"" xor:"storage" help:"Use disk storage for cache data e.g. /tmp/cache"`
-	StorageS3   string `env:"STORAGE_S3" required:"" xor:"storage" name:"storage-s3" help:"Use S3 storage for cache data e.g. s3://bucket"`
+	StorageDisk      string `env:"STORAGE_DISK" required:"" xor:"storage" help:"Use disk storage for cache data e.g. /tmp/cache"`
+	StorageS3        string `env:"STORAGE_S3" required:"" xor:"storage" name:"storage-s3" help:"Use S3 storage for cache data e.g. s3://bucket"`
+	StorageAzureBlob string `env:"STORAGE_AZUREBLOB" required:"" xor:"storage" name:"storage-azureblob" help:"Use Azure Blob Storage for cache data e.g. connectionstring with ;Container=blah on the end"`
 
 	// Misc
 	LogLevel             string `env:"LOG_LEVEL" default:"info" enum:"debug,info,warn,error"`
@@ -44,6 +45,10 @@ func main() {
 	if cli.StorageS3 != "" {
 		storageBackendName = "s3"
 		storageConnectionString = cli.StorageS3
+	}
+	if cli.StorageAzureBlob != "" {
+		storageBackendName = "azureblob"
+		storageConnectionString = cli.StorageAzureBlob
 	}
 
 	dbBackend, err := database.GetBackend(databaseBackendName, dbConnectionString)
