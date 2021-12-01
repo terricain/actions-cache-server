@@ -97,7 +97,7 @@ func (b *Backend) Type() string {
 // in sorted order, as we don't have data uploaded in order, we can't reliably do this.
 //
 // Write Uploads a part of a file to S3.
-func (b *Backend) Write(repoKey string, r io.Reader, start, end int, size int64) (string, int64, error) {
+func (b *Backend) Write(repoKey string, cacheID int, r io.Reader, start, end int, size int64) (string, int64, error) {
 	cacheFile := uuid.New().String()
 	filePath := p.Join(b.prefix, repoKey, cacheFile)
 
@@ -140,7 +140,7 @@ func (b *Backend) Delete(repoKey, path string) error {
 	return err
 }
 
-func (b *Backend) Finalise(repoKey string, parts []s.CachePart) (string, error) {
+func (b *Backend) Finalise(repoKey string, cacheID int, parts []s.CachePart) (string, error) {
 	// If we've only got 1 part, then use that as the cache file to save more work
 	if len(parts) == 1 {
 		filePath := p.Join(b.prefix, repoKey, parts[0].Data) // CachePart.Data would be a UUID without the repo key

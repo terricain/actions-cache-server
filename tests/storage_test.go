@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/terrycain/actions-cache-server/pkg/storage/azureblob"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -19,6 +21,18 @@ import (
 	s3backend "github.com/terrycain/actions-cache-server/pkg/storage/aws-s3"
 	"github.com/terrycain/actions-cache-server/pkg/storage/disk"
 )
+
+func GetAzureBlobBackend(t *testing.T, env string) storage.Backend {
+	t.Helper()
+	backend, err := azureblob.New(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = backend.Setup(); err != nil {
+		t.Fatal(err)
+	}
+	return backend
+}
 
 func GetDiskBackend(filepath string, t *testing.T) storage.Backend {
 	t.Helper()
@@ -107,9 +121,19 @@ func TestStorageBackends(t *testing.T) {
 	t.Run("s3", func(t *testing.T) {
 		s3Endpoint := os.Getenv("STORAGE_S3")
 		if s3Endpoint == "" {
-			t.Skip("Skipped postgres as no env var")
+			t.Skip("Skipped S3 as no env var")
 		}
 		backend := GetS3Backend(t, s3Endpoint)
+
+		runTests(backend, t)
+	})
+
+	t.Run("azureblob", func(t *testing.T) {
+		azureBlobConnString := os.Getenv("STORAGE_AZUREBLOB")
+		if azureBlobConnString == "" {
+			t.Skip("Skipped Azure Blob Storage as no env var")
+		}
+		backend := GetAzureBlobBackend(t, azureBlobConnString)
 
 		runTests(backend, t)
 	})
@@ -128,13 +152,14 @@ func testPartUploadDelete(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
 		randBuf := make([]byte, 6*1024*1024)
+		cacheID := rand.Intn(2147483647)
 
 		if _, err := rand.Read(randBuf); err != nil {
 			t.Fatalf("Failed to generate random file data: %s", err.Error())
 		}
 		r := bytes.NewReader(randBuf)
 
-		partData, bytesWritten, err := backend.Write(repo, r, 0, len(randBuf)-1, int64(len(randBuf)))
+		partData, bytesWritten, err := backend.Write(repo, cacheID, r, 0, len(randBuf)-1, int64(len(randBuf)))
 		if err != nil {
 			t.Fatalf("Failed to write part: %s", err.Error())
 		}
@@ -152,19 +177,20 @@ func testPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
 		randBuf := make([]byte, 6*1024*1024)
+		cacheID := rand.Intn(2147483647)
 
 		if _, err := rand.Read(randBuf); err != nil {
 			t.Fatalf("Failed to generate random file data: %s", err.Error())
 		}
 		r := bytes.NewReader(randBuf)
 
-		partData, _, err := backend.Write(repo, r, 0, len(randBuf)-1, int64(len(randBuf)))
+		partData, _, err := backend.Write(repo, cacheID, r, 0, len(randBuf)-1, int64(len(randBuf)))
 		if err != nil {
 			t.Fatalf("Failed to write part: %s", err.Error())
 		}
 
 		parts := []s.CachePart{{Start: 0, End: len(randBuf) - 1, Size: int64(len(randBuf)), Data: partData}}
-		path, err := backend.Finalise(repo, parts)
+		path, err := backend.Finalise(repo, cacheID, parts)
 		if err != nil {
 			t.Fatalf("Failed to finialise cache archive: %s", err.Error())
 		}
@@ -185,6 +211,7 @@ func testPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 func testMultiPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 	return func(t *testing.T) {
 		repo := uuid.NewString()
+		cacheID := rand.Intn(2147483647)
 		randBuf := make([]byte, 6*1024*1024)
 		randBuf2 := make([]byte, 3*1024*1024)
 		r1Start := 0
@@ -203,11 +230,11 @@ func testMultiPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 		r1 := bytes.NewReader(randBuf)
 		r2 := bytes.NewReader(randBuf)
 
-		partData1, _, err := backend.Write(repo, r1, r1Start, r1End, r1Size)
+		partData1, _, err := backend.Write(repo, cacheID, r1, r1Start, r1End, r1Size)
 		if err != nil {
 			t.Fatalf("Failed to write part: %s", err.Error())
 		}
-		partData2, _, err := backend.Write(repo, r2, r2Start, r2End, r2Size)
+		partData2, _, err := backend.Write(repo, cacheID, r2, r2Start, r2End, r2Size)
 		if err != nil {
 			t.Fatalf("Failed to write part: %s", err.Error())
 		}
@@ -216,7 +243,7 @@ func testMultiPartUploadFinalise(backend storage.Backend) func(t *testing.T) {
 			{Start: r1Start, End: r1End, Size: r1Size, Data: partData1},
 			{Start: r2Start, End: r2End, Size: r2Size, Data: partData2},
 		}
-		path, err := backend.Finalise(repo, parts)
+		path, err := backend.Finalise(repo, cacheID, parts)
 		if err != nil {
 			t.Fatalf("Failed to finialise cache archive: %s", err.Error())
 		}

@@ -50,18 +50,18 @@ func (mr *MockStorageBackendMockRecorder) Delete(arg0, arg1 interface{}) *gomock
 }
 
 // Finalise mocks base method.
-func (m *MockStorageBackend) Finalise(arg0 string, arg1 []s.CachePart) (string, error) {
+func (m *MockStorageBackend) Finalise(arg0 string, arg1 int, arg2 []s.CachePart) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Finalise", arg0, arg1)
+	ret := m.ctrl.Call(m, "Finalise", arg0, arg1, arg2)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Finalise indicates an expected call of Finalise.
-func (mr *MockStorageBackendMockRecorder) Finalise(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStorageBackendMockRecorder) Finalise(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalise", reflect.TypeOf((*MockStorageBackend)(nil).Finalise), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Finalise", reflect.TypeOf((*MockStorageBackend)(nil).Finalise), arg0, arg1, arg2)
 }
 
 // GenerateArchiveURL mocks base method.
@@ -123,9 +123,9 @@ func (mr *MockStorageBackendMockRecorder) Type() *gomock.Call {
 }
 
 // Write mocks base method.
-func (m *MockStorageBackend) Write(arg0 string, arg1 io.Reader, arg2, arg3 int, arg4 int64) (string, int64, error) {
+func (m *MockStorageBackend) Write(arg0 string, arg1 int, arg2 io.Reader, arg3, arg4 int, arg5 int64) (string, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Write", arg0, arg1, arg2, arg3, arg4)
+	ret := m.ctrl.Call(m, "Write", arg0, arg1, arg2, arg3, arg4, arg5)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -133,7 +133,7 @@ func (m *MockStorageBackend) Write(arg0 string, arg1 io.Reader, arg2, arg3 int, 
 }
 
 // Write indicates an expected call of Write.
-func (mr *MockStorageBackendMockRecorder) Write(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+func (mr *MockStorageBackendMockRecorder) Write(arg0, arg1, arg2, arg3, arg4, arg5 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockStorageBackend)(nil).Write), arg0, arg1, arg2, arg3, arg4)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Write", reflect.TypeOf((*MockStorageBackend)(nil).Write), arg0, arg1, arg2, arg3, arg4, arg5)
 }
